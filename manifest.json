@@ -1,0 +1,14 @@
+{
+    "name": "Tab E",
+    "description": "Expansion of tabs.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons": {
+        "128":"icons/tabs.svg"
+    },
+    "action": {},
+    "permissions": ["tabs"],
+    "background": {
+        "service_worker": "js/background.js"
+    }
+}

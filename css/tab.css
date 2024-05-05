@@ -1,0 +1,100 @@
+
+.tab {
+    margin: 0 3px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    cursor: pointer;
+
+    /* border-radius: 3px; */
+    position: relative;
+    overflow: hidden;
+
+    border-bottom: 1px solid transparent;
+    transition: border-color 300ms;
+
+    &:hover {
+        border-color: var(--color-accent);
+    }
+
+    /* &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-canvas);
+        filter: invert(100%);
+        opacity: 0;
+        transition: opacity 200ms;
+        z-index: 1;
+    }
+
+    &:hover::after {
+        opacity: .05;
+    } */
+}
+
+.tab > button {
+    background-color: transparent;
+    font-size: 14px;
+    color: var(--color-content);
+    margin: 0 3px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+
+.tab > button:not(.btn-title) {
+    height: 30px;
+    width: 30px;
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+.tab:hover > button:not(.btn-title) {
+    opacity: .4;
+}
+
+.tab > button:hover {
+    opacity: 1 !important;
+}
+
+.tab > button > svg {
+    width: 14px;
+    height: 14px;
+}
+
+.tab > button.btn-title {
+    flex-grow: 1;
+    text-align: left;
+    justify-content: left;
+    height: 30px;
+    color: var(--color-content);
+    transition: color 200ms;
+}
+
+.tab > button.btn-delete {
+    --color-red: var(--color-content);
+}
+
+.tab > .description {
+    width: 100%;
+    color: var(--color-content);
+    font-size: 10px;
+    margin: 0 50px 5px 50px;
+    line-height: 14px;
+    opacity: .8;
+}
+
+
+
+
+
+
+

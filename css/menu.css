@@ -1,0 +1,238 @@
+
+menu {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+menu > .dropdown {
+    margin: 10px 0;
+    width: 100%;
+}
+
+menu > .dropdown > .btn-drop {
+    font-size: 24px;
+    color: var(--color-accent);
+    background-color: transparent;
+    font-weight: 600;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 10px;
+
+    position: relative;
+    overflow: hidden;
+
+    border-radius: 5px;
+    
+    &::after {
+        content: "";
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert(100%);
+        opacity: 0;
+        position: absolute;
+        transition: 200ms;
+    }   
+
+    &:hover:after {
+        opacity: .05;
+    }
+}
+
+menu > .dropdown > .btn-drop > svg {
+    width: 28px;
+    height: 28px;
+    margin: 0 15px;
+}
+
+menu > .dropdown > .content {
+    display: block;
+    width: var(--width-menu);
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, .5) inset;
+    max-height: 0;
+
+    border-top: 1px dashed var(--color-accent);
+    border-bottom: 1px dashed var(--color-accent);
+
+    transition: max-height 300ms;
+}
+
+menu > .dropdown > .content > div {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+
+menu > .dropdown > .content > div > button {
+    padding: 10px;
+    font-size: 20px;
+    text-align: left;
+    position: relative;
+    background-color: transparent;
+    color: var(--color-accent);
+
+    display: flex;
+    align-items: center;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert(100%);
+        opacity: 0;
+    }
+
+    &:hover:after {
+        opacity: .05;
+    }
+}
+
+menu > .dropdown > .content > div > button > svg {
+    width: 26px;
+    height: 26px;
+    margin-right: 15px;
+}
+
+menu > .dropdown:hover > .content {
+    max-height: 200px;
+}
+
+
+/* GROUPS */
+
+
+menu > .group-links {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+menu > .group-links > button {
+    background-color: transparent;
+    position: relative;
+    color: var(--color-content);
+
+    display: grid;
+    grid-template-columns: 85% 15%;
+    align-items: center;
+    padding: 5px 10px;
+    font-size: 14px;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert(100%);
+        opacity: 0;
+        transition: opacity 200ms;
+    }
+
+    &:hover:after {
+        opacity: .05;
+    }
+}
+
+menu > .group-links > button > .title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        background: linear-gradient(90deg, rgba(0,0,0,0) 0%, var(--color-widget) 100%);;
+    }
+}
+
+menu > .group-links > button > .count {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: right;
+    opacity: .6;
+}
+
+menu > .group-links::-webkit-scrollbar {
+	width: 2px;
+}
+
+menu > .group-links::-webkit-scrollbar-track {
+	background-color: transparent;
+    border-radius: 1px;
+}
+
+menu > .group-links::-webkit-scrollbar-thumb {
+	background-color: var(--color-content-30);
+    border-radius: 1px;
+}
+
+menu > .group-links::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+
+/* MENU BOTTOM */
+
+menu > .menu-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 20px;
+}
+
+menu > .menu-bottom > button {
+    background-color: transparent;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert(100%);
+        opacity: 0;
+        transition: 200ms;
+    }
+
+    &:hover::after {
+        opacity: .05;
+    }
+}
+
+menu > .menu-bottom > button > svg {
+    width: 15px;
+    height: 15px;
+}
+
+
+

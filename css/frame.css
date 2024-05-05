@@ -1,0 +1,27 @@
+
+body {
+    --color-canvas: #171717;
+    --color-widget: #262626;
+    --color-accent: #8A9B68;
+    --color-content: #B5B5B5;
+    --color-content-80: rgba(181, 181, 181, .8);
+    --color-content-30: rgba(181, 181, 181, .3);
+    --color-red: #f33330;
+}
+
+.frame {
+    --width-menu: 270px;
+    height: 100%;
+    display: grid;
+    grid-template-columns: var(--width-menu) 1fr;
+}
+
+.frame > menu {
+    background-color: var(--color-widget);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+    z-index: 2;
+}
+
+.frame > main {
+    background-color: var(--color-canvas);
+}
