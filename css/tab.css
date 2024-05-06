@@ -1,100 +1,139 @@
 
+
 .tab {
-    margin: 0 3px;
+    --sb: 24px;
+    --mr: 3px;
+
+    display: grid;
+    grid-template-columns: var(--sb) var(--sb) 1fr var(--sb) var(--sb);
+    grid-template-rows: var(--sb);
+
+    justify-content: stretch;
+    align-content: stretch;
+
+    grid-gap: var(--mr);
+    margin: var(--mr) 10px;
+}
+
+.tab > .sw > button > svg,
+.tab > button > svg {
+    width: 60%;
+    height: 60%;
+}
+
+.tab > .sw > button.btn-select > svg {
+    width: 80%;
+    height: 80%;
+}
+
+.tab > button > img {
+    width: 80%;
+    height: 80%;
+}
+
+.tab > .sw > button {
     width: 100%;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    height: 100%;
 
-    cursor: pointer;
-
-    /* border-radius: 3px; */
-    position: relative;
-    overflow: hidden;
-
-    border-bottom: 1px solid transparent;
-    transition: border-color 300ms;
-
-    &:hover {
-        border-color: var(--color-accent);
+    &:first-child { /* .btn-delete */
+        display: flex;
     }
 
-    /* &::after {
+    &:last-child { /* .btn-select */
+        display: none;
+    }
+}
+
+/* При включении режима выделения группе добавляется .is-select-mode */
+.g.is-select-mode > .tab > .sw > button {
+    width: 100%;
+    height: 100%;
+
+    &:first-child { /* .btn-delete */
+        display: none;
+    }
+
+    &:last-child { /* .btn-select */
+        display: flex;
+    }
+}
+
+/* выбранной вкладке добавляется .select */
+.tab > .sw > button.btn-select {
+    position: relative;
+}
+
+.tab > .sw > button.btn-select > svg  {
+    position: absolute;
+}
+
+.g.is-select-mode > .tab > .sw > button.btn-select > svg:first-child {
+    scale: 0;
+    transition: scale 200ms;
+}
+
+.g.is-select-mode > .tab.selected > .sw > button.btn-select > svg:first-child {
+    scale: 1.3;
+}
+
+.tab > .description {
+    grid-column: 2 / -1;
+    color: var(--color-content);
+    font-size: 10px;
+    line-height: 14px;
+    opacity: .8;
+
+    &::selection {
+        background-color: var(--color-accent);
+        color: var(--color-widget);
+    }
+}
+
+.tab > .sw > button,
+.tab > button {
+    background-color: transparent;
+    color: var(--color-content);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    user-select: none;
+}
+
+.tab > button.btn-title {
+    padding-left: 5px;
+    font-size: 14px;
+    justify-content: flex-start;
+
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+
+    &::after {
         content: "";
         position: absolute;
         top: 0;
         right: 0;
         bottom: 0;
-        left: 0;
-        background-color: var(--color-canvas);
-        filter: invert(100%);
-        opacity: 0;
-        transition: opacity 200ms;
-        z-index: 1;
+        width: 20px;
+        background: linear-gradient(90deg, rgba(0,0,0,0) 0%, var(--color-canvas) 100%);;
     }
-
-    &:hover::after {
-        opacity: .05;
-    } */
 }
 
-.tab > button {
-    background-color: transparent;
-    font-size: 14px;
-    color: var(--color-content);
-    margin: 0 3px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3;
-}
-
-.tab > button:not(.btn-title) {
-    height: 30px;
-    width: 30px;
+.tab > .sw > button.btn-delete,
+.tab > .btn-descr,
+.tab > .btn-dup {
     opacity: 0;
     transition: opacity 200ms;
 }
 
-.tab:hover > button:not(.btn-title) {
-    opacity: .4;
+.tab:hover > .sw > button.btn-delete,
+.tab:hover > .btn-descr,
+.tab:hover > .btn-dup {
+    opacity: 1;
 }
 
-.tab > button:hover {
-    opacity: 1 !important;
+.tab > .sw > button.btn-delete {
+    --color-red: var(--color-content)
 }
-
-.tab > button > svg {
-    width: 14px;
-    height: 14px;
-}
-
-.tab > button.btn-title {
-    flex-grow: 1;
-    text-align: left;
-    justify-content: left;
-    height: 30px;
-    color: var(--color-content);
-    transition: color 200ms;
-}
-
-.tab > button.btn-delete {
-    --color-red: var(--color-content);
-}
-
-.tab > .description {
-    width: 100%;
-    color: var(--color-content);
-    font-size: 10px;
-    margin: 0 50px 5px 50px;
-    line-height: 14px;
-    opacity: .8;
-}
-
-
-
-
-
-
-

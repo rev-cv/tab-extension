@@ -114,6 +114,8 @@ menu > .dropdown:hover > .content {
 
 
 menu > .group-links {
+    flex-grow: 1;
+    
     display: flex;
     flex-direction: column;
     margin-top: 20px;
