@@ -73,6 +73,7 @@ main > .groups > .g > .control-panel > .count {
     user-select: none;
 }
 
+main > .groups > .g > .control-panel > .btn-save,
 main > .groups > .g > .control-panel > .btn-g-sort-alp,
 main > .groups > .g > .control-panel > .btn-g-sort-www,
 main > .groups > .g > .control-panel > .btn-g-select {
@@ -98,6 +99,7 @@ main > .groups > .g > .control-panel > .btn-g-select {
     }
 }
 
+main > .groups > .g > .control-panel > .btn-save > svg,
 main > .groups > .g > .control-panel > .btn-g-select > svg,
 main > .groups > .g > .control-panel > .btn-g-sort-alp > svg,
 main > .groups > .g > .control-panel > .btn-g-sort-www > svg {
@@ -177,7 +179,6 @@ main > .groups > .g > .sub-control-panel > button.select-delete {
     color: var(--color-red);
 }
 
-
 main > .groups > .g > .sub-control-panel > button.select-all-select {
     height: 24px;
     display: flex;
@@ -187,7 +188,6 @@ main > .groups > .g > .sub-control-panel > button.select-all-select {
     background-color: transparent;
     margin-right: 10px;
 }
-
 
 main > .groups > .g > .sub-control-panel > button.select-all-select > span {
     font-size: 14px;
@@ -203,7 +203,6 @@ main > .groups > .g > .sub-control-panel > button.select-all-select > svg {
     &:first-child {
         scale: 0;
     }
-
 }
 
 main > .groups > .g > .sub-control-panel > button.select-all-select.active  > svg {
@@ -211,11 +210,3 @@ main > .groups > .g > .sub-control-panel > button.select-all-select.active  > sv
         scale: 1.3;
     }
 }
-
-/* 
-<button class="select-all-select">
-    <svg class="icon"><use xlink:href="#ico-check-true"/></svg>
-    <svg class="icon"><use xlink:href="#ico-check-false"/></svg>
-    <span>12</span>
-</button>
- */

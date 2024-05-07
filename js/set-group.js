@@ -147,8 +147,17 @@ function setGroup (objGroup) {
 
     let count = document.createElement('div');
     count.className = "count";
-    count.innerHTML = objGroup.tabs.length
+    count.innerHTML = objGroup.tabs.length;
     panel.append(count);
+
+    if (objGroup.id === "current") {
+        let btnSave = document.createElement('button');
+        btnSave.className = "btn-save";
+        btnSave.title = "save to storage";
+        btnSave.innerHTML = '<svg class="icon"><use xlink:href="#ico-save"/></svg>';
+        btnSave.onclick = event => saveCurrentSession();
+        panel.append(btnSave);
+    }
 
 
 
@@ -210,7 +219,7 @@ function setGroup (objGroup) {
     btnDelete.className = "select-delete";
     btnDelete.innerHTML = `
         <svg class="icon"><use xlink:href="#ico-del"/></svg>
-        <span>delete</span>
+        <span>${ objGroup.id != "current" ? "delete" : "close" }</span>
     `;
     subPanel.append(btnDelete);
 
@@ -228,7 +237,7 @@ function setGroup (objGroup) {
 
 
     let pointMenu = document.createElement('button');
-    pointMenu.href = "#" + objGroup.id;
+    pointMenu.id = `point-for-${objGroup.id}`;
     pointMenu.onclick = () => {
             scrollToElement(group)
     }
@@ -297,10 +306,12 @@ function setTab (group, objTab) {
     let btnDomain = document.createElement('button');
     btnDomain.className = "btn-ico-domain";
     btnDomain.title = objTab.domain;
-    btnDomain.innerHTML = objTab.icon != "" ? 
+    btnDomain.innerHTML = objTab.icon != "" && objTab.icon != undefined ? 
         `<img src="${objTab.icon}" />`
-        :
-        '<svg class="icon"><use xlink:href="#ico-no-image"/></svg>'
+        : objTab.domain === "extensions" ?
+            '<svg class="icon"><use xlink:href="#ico-extension"/></svg>'
+            : 
+            '<svg class="icon"><use xlink:href="#ico-no-image"/></svg>'
     tab.append(btnDomain);
 
     let btnTitle = document.createElement('button');
@@ -355,9 +366,9 @@ function scrollToElement(element) {
 }
 
 
-for (let index = 0; index < 10; index++) {
-    textObjGroup.id = `g-${index}`;
-    textObjGroup.name = `g-${index}`;
-    setGroup (textObjGroup);
-}
+// for (let index = 0; index < 10; index++) {
+//     textObjGroup.id = `g-${index}`;
+//     textObjGroup.name = `g-${index}`;
+//     setGroup (textObjGroup);
+// }
 
