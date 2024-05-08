@@ -65,6 +65,11 @@ main > .groups > .g > .control-panel > h2 {
     }
 }
 
+main > .groups > .g > .control-panel > h2 {
+    user-select: none;
+    justify-content: flex-start;
+}
+
 main > .groups > .g > .control-panel > .count {
     font-size: 18px;
     color: var(--color-accent);

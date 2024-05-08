@@ -1,138 +1,68 @@
-
-let textObjGroup = {
-    id: "g-202405051245",
-    name: "",
-    date: "2024-05-05T12:45", // дата создания
-    tabs: [
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1 Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1 Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-        {
-            id: "t-202405051245-0001",
-            title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
-            url: "https://habr.com/ru/companies/otus/articles/809865/",
-            icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
-            date: "2024-05-05T12:45",
-            domain: "habr.com",
-            description: "",
-        },
-    ],
-}
+// пример группы
+// {
+//     id: "t-202405051245-0001",
+//     title: "Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
+//     url: "https://habr.com/ru/companies/otus/articles/809865/",
+//     icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
+//     date: "2024-05-05T12:45",
+//     domain: "habr.com",
+//     description: "",
+// },
 
 const nodeMenu = document.querySelector("menu > .group-links")
 const nodeGroups = document.querySelector("main > .groups")
 
 
-function setGroup (objGroup) {
+function setGroup (objGroup, isAfterCurrent=false) {
 
-    let nameGroup = objGroup.name.length === 0 ? objGroup.date : objGroup.name;
+    const nameGroup = objGroup.name.length === 0 ? objGroup.date : objGroup.name;
+    const isCurrent = objGroup.id === "current";
 
     let group = document.createElement('div');
-    group.id = objGroup.id;
+    group.id = `group-${objGroup.id}`;
     group.className = "g";
+
 
     // PANEL
     let panel = document.createElement('div');
     panel.className = "control-panel";
     group.append(panel);
-
+    
     let btnSelect = document.createElement('button');
     btnSelect.className = "btn-g-select";
     btnSelect.innerHTML = '<svg class="icon"><use xlink:href="#ico-select"/></svg>'
-    btnSelect.onclick = () => {
-            group.classList.toggle("is-select-mode");
-            group.querySelectorAll(".tab").forEach( elem => {
-                elem.classList.remove("selected")
-            })
-            btnSelectAll.classList.remove("active");
-            btnSelectAll.querySelector("span").innerHTML = 0;
-    }
+    btnSelect.onclick = event => {
+        group.classList.toggle("is-select-mode");
+        group.querySelectorAll(".tab").forEach( elem => {
+            elem.classList.remove("selected")
+        })
+        btnSelectAll.classList.remove("active");
+        btnSelectAll.querySelector("span").innerHTML = 0;
+    };
     panel.append(btnSelect);
 
-    let inputTittle = document.createElement('input');
-    inputTittle.className = "edit-title";
-    inputTittle.type = "text";
-    inputTittle.value = nameGroup;
-    panel.append(inputTittle);
+    if (isCurrent) {
+        let btnSave = document.createElement('button');
+        btnSave.className = "btn-save";
+        btnSave.title = "save to storage";
+        btnSave.innerHTML = '<svg class="icon"><use xlink:href="#ico-save"/></svg>';
+        btnSave.onclick = saveCurrentSession;
+        panel.append(btnSave);
+    } 
 
+    if (isCurrent) {
+        let inputTittle = document.createElement('h2');
+        inputTittle.innerHTML = nameGroup;
+        panel.append(inputTittle);
+    } else {
+        let inputTittle = document.createElement('input');
+        inputTittle.id = `H2FORM-${objGroup.id}`
+        inputTittle.className = "edit-title";
+        inputTittle.type = "text";
+        inputTittle.value = nameGroup;
+        panel.append(inputTittle);
+    }
+    
     let btnSortAlp = document.createElement('button');
     btnSortAlp.className = "btn-g-sort-alp";
     btnSortAlp.title = "sort alphabetically";
@@ -150,19 +80,10 @@ function setGroup (objGroup) {
     count.innerHTML = objGroup.tabs.length;
     panel.append(count);
 
-    if (objGroup.id === "current") {
-        let btnSave = document.createElement('button');
-        btnSave.className = "btn-save";
-        btnSave.title = "save to storage";
-        btnSave.innerHTML = '<svg class="icon"><use xlink:href="#ico-save"/></svg>';
-        btnSave.onclick = event => saveCurrentSession();
-        panel.append(btnSave);
-    }
-
-
 
     // SUB PANEL
 
+    
     let subPanel = document.createElement('div');
     subPanel.className = "sub-control-panel";
 
@@ -225,14 +146,24 @@ function setGroup (objGroup) {
 
 
     group.append(subPanel);
+    
 
+    if (0 < objGroup.tabs.length){
+        objGroup.tabs.forEach( tab => setTab(group, tab, isCurrent) );
+    } else {
+        // let noTabs = document.createElement('div');
+        // noTabs.className = ".tab";
+        // noTabs.innerHTML = "no tabs";
+        // group.append(noTabs);
+    }
+    
 
-
-    objGroup.tabs.forEach( tab => setTab(group, tab) );
-
-
-
-    nodeGroups.append(group)
+    // место вставки группы
+    if (isAfterCurrent) {
+        document.querySelector("#group-current").after(group)
+    } else {
+        nodeGroups.append(group)
+    }
 
 
 
@@ -256,8 +187,9 @@ function setGroup (objGroup) {
 }
 
 
-function setTab (group, objTab) {
+function setTab (group, objTab, isCurrent) {
     let tab = document.createElement('div');
+    tab.id = `tab-${objTab.id}`
     tab.className = "tab";
 
     let sw = document.createElement('div');
@@ -267,6 +199,16 @@ function setTab (group, objTab) {
     let btnDelete = document.createElement('button');
     btnDelete.className = "btn-delete";
     btnDelete.innerHTML = '<svg class="icon"><use xlink:href="#ico-del"/></svg>'
+    btnDelete.onclick = event => {
+            if (isCurrent){
+                // закрыть закрыть вкладку в браузере
+                chrome.tabs.remove(objTab.id)
+            } else {
+                // удалить вкладку из базы
+                tab.remove();
+                deleteTab(objTab.id, objTab.date);
+            }
+    }
     sw.append(btnDelete);
 
     let btnSelect = document.createElement('button');
@@ -318,6 +260,18 @@ function setTab (group, objTab) {
     btnTitle.className = "btn-title";
     btnTitle.title = objTab.title;
     btnTitle.innerHTML = objTab.title;
+    btnTitle.addEventListener("mousedown", event => {
+        if (isCurrent) {
+            chrome.tabs.update(objTab.id, { active: true });
+        } else if (event.button === 0) {
+            chrome.tabs.create({ url: objTab.url });
+            tab.remove();
+            deleteTab(objTab.id, objTab.date);
+        } else if (event.button === 1) {
+            chrome.tabs.create({ url: objTab.url, active: false });
+            // updateCurrentSession()
+        }
+    })
     tab.append(btnTitle);
 
     let btnDescription = document.createElement('button');
@@ -364,11 +318,3 @@ function scrollToElement(element) {
     }
     requestAnimationFrame(animate);
 }
-
-
-// for (let index = 0; index < 10; index++) {
-//     textObjGroup.id = `g-${index}`;
-//     textObjGroup.name = `g-${index}`;
-//     setGroup (textObjGroup);
-// }
-

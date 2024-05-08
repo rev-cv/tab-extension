@@ -69,33 +69,52 @@ function addCurrentSession () {
     chrome.tabs.query({ currentWindow: true }, tabs => {
         setGroup({
             id: "current",
-            name: "Current",
+            name: "<b>Current</b>",
             date,
             tabs: getCurrentTabs(tabs, date)
         })
     });
-
 }
-
-
-document.addEventListener('visibilitychange', () => {
-    // обновление текущих вкладок при переходе на вкладку расширения
-    const date = getCurrentDate();
-
-    const current = document.querySelector("#current");
-    const counter1 = document.querySelector("#point-for-current  > .count");
-    const counter2 = current.querySelector(`.control-panel > .count`);
-    current.querySelectorAll(".tab").forEach( elem => elem.remove())
-
-
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-        const alltabs = getCurrentTabs(tabs, date);
-        counter1.innerHTML = alltabs.length;
-        counter2.innerHTML = alltabs.length;
-        alltabs.forEach( tab => setTab(current, tab))
-    });
-});
-
 addCurrentSession()
 
+
+function updateCurrentSession () {
+    // перерисовывает группу Current
+
+    console.log("update")
+
+    setTimeout(() => {
+        const date = getCurrentDate();
+
+        const current = document.querySelector("#group-current");
+
+        const height = current.style.height;
+        current.style.minHeight = height;
+        current.style.maxHeight = height;
+
+        const counter1 = document.querySelector("#point-for-current > .count");
+        const counter2 = current.querySelector(`.control-panel > .count`);
+
+        current.querySelectorAll(".tab").forEach( elem => elem.remove()),
+
+        chrome.tabs.query({ currentWindow: true }, tabs => {
+            const alltabs = getCurrentTabs(tabs, date);
+            counter1.innerHTML = alltabs.length;
+            counter2.innerHTML = alltabs.length;
+            alltabs.forEach( tab => setTab(current, tab, true))
+        })
+
+        current.style.minHeight = "auto";
+        current.style.maxHeight = "auto";
+    }, 1000);
+}
+
+// обновление текущих вкладок при переходе на вкладку расширения
+document.addEventListener('visibilitychange', updateCurrentSession);
+
+// обновление текущих вкладок при закрытии какой-то вкладки
+chrome.tabs.onRemoved.addListener(updateCurrentSession);
+
+// обновление текущих вкладок при открытии какой-то вкладки
+chrome.tabs.onCreated.addListener(updateCurrentSession);
 

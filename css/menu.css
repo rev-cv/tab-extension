@@ -6,112 +6,33 @@ menu {
     user-select: none;
 }
 
-menu > .dropdown {
-    margin: 10px 0;
-    width: 100%;
-}
-
-menu > .dropdown > .btn-drop {
-    font-size: 24px;
-    color: var(--color-accent);
-    background-color: transparent;
-    font-weight: 600;
-    width: 100%;
-
+menu > .logo {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-
-    padding: 10px;
-
-    position: relative;
-    overflow: hidden;
-
-    border-radius: 5px;
-    
-    &::after {
-        content: "";
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background-color: var(--color-widget);
-        filter: invert(100%);
-        opacity: 0;
-        position: absolute;
-        transition: 200ms;
-    }   
-
-    &:hover:after {
-        opacity: .05;
-    }
+    margin: 20px;
 }
 
-menu > .dropdown > .btn-drop > svg {
-    width: 28px;
-    height: 28px;
-    margin: 0 15px;
+menu > .logo > .text {
+    font-size: 30px;
+    font-weight: 700;
+    background: linear-gradient(
+        145deg,
+        var(--color-content),
+        var(--color-content-30)
+    ); /* Цвет фона текста */
+    background: linear-gradient(150deg, #708090, #556B2F, #2E8B57);
+    background: linear-gradient(120deg, #556B2F, #A9A9A9);
+    color: transparent; /* Делаем текст прозрачным */
+    background-clip: text; /* Применяем цвет фона к тексту для остальных браузеров */
 }
 
-menu > .dropdown > .content {
-    display: block;
-    width: var(--width-menu);
-    overflow: hidden;
-    box-shadow: 0 0 20px rgba(0, 0, 0, .5) inset;
-    max-height: 0;
-
-    border-top: 1px dashed var(--color-accent);
-    border-bottom: 1px dashed var(--color-accent);
-
-    transition: max-height 300ms;
+menu > .logo > svg {
+    --color-accent: var(--color-content-80);
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
 }
-
-menu > .dropdown > .content > div {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 0;
-}
-
-menu > .dropdown > .content > div > button {
-    padding: 10px;
-    font-size: 20px;
-    text-align: left;
-    position: relative;
-    background-color: transparent;
-    color: var(--color-accent);
-
-    display: flex;
-    align-items: center;
-
-    &::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background-color: var(--color-widget);
-        filter: invert(100%);
-        opacity: 0;
-    }
-
-    &:hover:after {
-        opacity: .05;
-    }
-}
-
-menu > .dropdown > .content > div > button > svg {
-    width: 26px;
-    height: 26px;
-    margin-right: 15px;
-}
-
-menu > .dropdown:hover > .content {
-    max-height: 200px;
-}
-
-
-/* GROUPS */
-
 
 menu > .group-links {
     flex-grow: 1;
