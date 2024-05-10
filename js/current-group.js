@@ -1,7 +1,22 @@
 
-// const regexDomain = /(?:https?|ftp):\/\/([^\s\/]+)(\/|$)/gm;
-
 const regexDomain = /^(?:https?|ftp):\/\/([^\/]+)/;
+
+function getDomain (url) {
+    let domain = regexDomain.exec(url);
+
+    if (domain === null) {
+        if ( url.includes("file:///") ) {
+            domain = ["", "file"];
+        } else if ( url.includes("chrome-extension://") ) {
+            domain = ["", "chrome-extension"];
+        } else if ( url.includes("chrome://extensions/") ) {
+            domain = ["", "extensions"];
+        } else if (url.includes("chrome://newtab/")) {
+            domain = ["", "newtab"];
+        }
+    }
+    return domain
+}
 
 function getCurrentTabs(tabs, date){
     // преобразование текущих открытых вкладок в объект для расширения
@@ -11,17 +26,7 @@ function getCurrentTabs(tabs, date){
     tabs.forEach( tab => {
         if (!tab.pinned) {
 
-            let domain = regexDomain.exec(tab.url);
-
-            if (domain === null) {
-                if ( tab.url.includes("file:///") ) {
-                    domain = ["", "file"];
-                } else if ( tab.url.includes("chrome-extension://") ) {
-                    domain = ["", "chrome-extension"];
-                } else if ( tab.url.includes("chrome://extensions/") ) {
-                    domain = ["", "extensions"];
-                }
-            }
+            const domain = getDomain(tab.url)
 
             if (domain != null) {
 
@@ -49,6 +54,7 @@ function getCurrentTabs(tabs, date){
     return currentTabs
 }
 
+
 function getCurrentDate () {
     // стандартизированная функция получения текущего времени
     const date = new Date();
@@ -62,59 +68,139 @@ function getCurrentDate () {
 }
 
 
-function addCurrentSession () {
+async function addCurrentSession () {
     // добавление текущей сессии при первом открытии окна расширения
     const date = getCurrentDate();
 
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-        setGroup({
-            id: "current",
-            name: "<b>Current</b>",
-            date,
-            tabs: getCurrentTabs(tabs, date)
-        })
-    });
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+
+    setGroup({
+        id: "current",
+        name: "<b>Current</b>",
+        date,
+        tabs: getCurrentTabs(tabs, date)
+    })
+
 }
 addCurrentSession()
 
 
-function updateCurrentSession () {
+async function updateCurrentSession__FULL () {
     // перерисовывает группу Current
 
-    console.log("update")
+    const current = document.querySelector("#group-current");
+    const counter1 = document.querySelector("#point-for-current > .count");
+    const counter2 = current.querySelector(`.control-panel > .count`);
 
-    setTimeout(() => {
-        const date = getCurrentDate();
+    current.querySelectorAll(".tab").forEach( elem => elem.remove());
 
-        const current = document.querySelector("#group-current");
+    const tabs = getCurrentTabs(
+        await chrome.tabs.query({ currentWindow: true }), 
+        getCurrentDate()
+    );
 
-        const height = current.style.height;
-        current.style.minHeight = height;
-        current.style.maxHeight = height;
+    counter1.innerHTML = tabs.length;
+    counter2.innerHTML = tabs.length;
+    tabs.forEach( tab => setTab(current, tab, true))
+}
 
-        const counter1 = document.querySelector("#point-for-current > .count");
-        const counter2 = current.querySelector(`.control-panel > .count`);
 
-        current.querySelectorAll(".tab").forEach( elem => elem.remove()),
+async function updateCurrentSession (IDTabUploaded) {
 
-        chrome.tabs.query({ currentWindow: true }, tabs => {
-            const alltabs = getCurrentTabs(tabs, date);
-            counter1.innerHTML = alltabs.length;
-            counter2.innerHTML = alltabs.length;
-            alltabs.forEach( tab => setTab(current, tab, true))
-        })
+    // перерисовывает группу Current
 
-        current.style.minHeight = "auto";
-        current.style.maxHeight = "auto";
-    }, 1000);
+    const currentGroup = document.querySelector("#group-current");
+    const counter1 = document.querySelector("#point-for-current > .count");
+    const counter2 = currentGroup.querySelector(`.control-panel > .count`);
+    const current = currentGroup.querySelectorAll(".tab");
+
+    /*
+        Подобная сложная схема управлению ссылками на открытые вкладки 
+        необходима для того, чтобы избежать лишних пересозданий ссылок
+        и сгладить дерганье интерфейса появляющее при перерисовке.
+    */
+
+    // получение открытых окон
+    const modified = getCurrentTabs(
+        await chrome.tabs.query({ currentWindow: true }), 
+        getCurrentDate()
+    );
+
+    const modifiedID = modified.map( tab => tab.id );
+    const currentID = [];
+
+    // удаление ссылок на закрытые вкладки
+    current.forEach( elem => {
+        const elemID = Number(elem.id.replace("tab-", ""));
+        if (!modifiedID.includes(elemID)){
+            elem.remove();
+        } else {
+            currentID.push(elemID)
+        }
+    })
+
+    let isMoveTo = false;
+
+    // добавление открытых вкладок
+    for (let i = 0; i < modified.length; i++) {
+        const elem = modified[i];
+
+        if (elem.id === currentID[i]){
+            // все находится на своих местах
+
+            if (elem.id === IDTabUploaded){
+                // обновление данных загруженной вкладки
+                const imgSel = `#tab-${modified[i-1].id} > .btn-ico-domain > img`;
+                const img = currentGroup.querySelector(imgSel);
+                img.src = elem.favIconUrl;
+
+                const titleSel = `#tab-${modified[i-1].id} > .btn-title`;
+                const title = currentGroup.querySelector(titleSel);
+                title.innerHTML = elem.title;
+            }
+
+            continue
+        }
+        
+        if (!currentID.includes(elem.id)) {
+            // в currentGroup нет ссылки на вкладку
+            // добавляется новая ссылка на вкладку
+            const setAfterNode = i === 0 ?
+                currentGroup.querySelector(`.sub-control-panel`)
+                :
+                currentGroup.querySelector(`#tab-${modified[i-1].id}`)
+
+            setTab(currentGroup, elem, true, setAfterNode)
+        } else {
+            // требуется сортировка вкладок
+            if (!isMoveTo) isMoveTo = true;
+        }
+    }
+
+    if (isMoveTo)
+        sortTabs(currentGroup, modifiedID)
+
+    counter1.innerHTML = modified.length;
+    counter2.innerHTML = modified.length;
 }
 
 // обновление текущих вкладок при переходе на вкладку расширения
-document.addEventListener('visibilitychange', updateCurrentSession);
+document.addEventListener('visibilitychange', updateCurrentSession__FULL);
 
 // обновление текущих вкладок при закрытии какой-то вкладки
 chrome.tabs.onRemoved.addListener(updateCurrentSession);
 
 // обновление текущих вкладок при открытии какой-то вкладки
-chrome.tabs.onCreated.addListener(updateCurrentSession);
+chrome.tabs.onCreated.addListener(tab => {
+    const tabId = tab.id;
 
+    const onTabUpdated = (updatedTabId, changeInfo, updatedTab) => {
+        if (updatedTabId === tabId && changeInfo.status === "complete") {
+            // Вкладка полностью загружена
+            updateCurrentSession(tabId)
+            chrome.tabs.onUpdated.removeListener(onTabUpdated);
+        }
+    };
+    // отслеживание окончания загрузки вкладки
+    chrome.tabs.onUpdated.addListener(onTabUpdated);
+});

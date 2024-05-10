@@ -18,6 +18,8 @@ function setGroup (objGroup, isAfterCurrent=false) {
     const nameGroup = objGroup.name.length === 0 ? objGroup.date : objGroup.name;
     const isCurrent = objGroup.id === "current";
 
+    let sortType = "none"; // содержит информацию о применененной сортировке вкладок
+
     let group = document.createElement('div');
     group.id = `group-${objGroup.id}`;
     group.className = "g";
@@ -32,12 +34,12 @@ function setGroup (objGroup, isAfterCurrent=false) {
     btnSelect.className = "btn-g-select";
     btnSelect.innerHTML = '<svg class="icon"><use xlink:href="#ico-select"/></svg>'
     btnSelect.onclick = event => {
-        group.classList.toggle("is-select-mode");
-        group.querySelectorAll(".tab").forEach( elem => {
-            elem.classList.remove("selected")
-        })
-        btnSelectAll.classList.remove("active");
-        btnSelectAll.querySelector("span").innerHTML = 0;
+            group.classList.toggle("is-select-mode");
+            group.querySelectorAll(".tab").forEach( elem => {
+                elem.classList.remove("selected")
+            })
+            btnSelectAll.classList.remove("active");
+            btnSelectAll.querySelector("span").innerHTML = 0;
     };
     panel.append(btnSelect);
 
@@ -66,13 +68,31 @@ function setGroup (objGroup, isAfterCurrent=false) {
     let btnSortAlp = document.createElement('button');
     btnSortAlp.className = "btn-g-sort-alp";
     btnSortAlp.title = "sort alphabetically";
-    btnSortAlp.innerHTML = '<svg class="icon"><use xlink:href="#ico-sort-alp"/></svg>'
+    btnSortAlp.innerHTML = '<svg class="icon"><use xlink:href="#ico-sort-alp"/></svg>';
+    btnSortAlp.onclick = event => {
+            // сортировка по title
+            btnSortAlp = btnSortAlp === "+alp" ? "-alp" : "+alp";
+            if (isCurrent) {
+                sortForCurrentByTitle(btnSortAlp === "-alp");
+            } else {
+                sortByTitle(group, objGroup.tabs, btnSortAlp === "-alp")
+            }
+    }
     panel.append(btnSortAlp);
     
     let btnSortWWW = document.createElement('button');
     btnSortWWW.className = "btn-g-sort-www";
     btnSortWWW.title = "sort by domain";
     btnSortWWW.innerHTML = '<svg class="icon"><use xlink:href="#ico-www"/></svg>';
+    btnSortWWW.onclick = event => {
+            // сортировка по domain
+            btnSortAlp = btnSortAlp === "+dom" ? "-dom" : "+dom";
+            if (isCurrent) {
+                sortForCurrentByDomain(btnSortAlp === "-dom");
+            } else {
+                sortByDomain(group, objGroup.tabs, btnSortAlp === "-dom")
+            }
+    }
     panel.append(btnSortWWW);
 
     let count = document.createElement('div');
@@ -120,13 +140,23 @@ function setGroup (objGroup, isAfterCurrent=false) {
     }
     subPanel.append(btnSelectAll);
 
-    let btnOpenThis = document.createElement('button');
-    btnOpenThis.className = "select-open-this";
-    btnOpenThis.innerHTML = `
-        <svg class="icon"><use xlink:href="#ico-this-win"/></svg>
-        <span>open in this window</span>
-    `;
-    subPanel.append(btnOpenThis);
+    if (!isCurrent) {
+        let btnOpenThis = document.createElement('button');
+        btnOpenThis.className = "select-open-this";
+        btnOpenThis.innerHTML = `
+            <svg class="icon"><use xlink:href="#ico-this-win"/></svg>
+            <span>open in this window</span>
+        `;
+        subPanel.append(btnOpenThis);
+    } else {
+        let btnSaveAndClose = document.createElement('button');
+        btnSaveAndClose.className = "select-open-this";
+        btnSaveAndClose.innerHTML = `
+            <svg class="icon"><use xlink:href="#ico-save"/></svg>
+            <span>save & close</span>
+        `;
+        subPanel.append(btnSaveAndClose);
+    }
 
     let btnOpenNew = document.createElement('button');
     btnOpenNew.className = "select-open-new";
@@ -166,6 +196,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
     }
 
 
+    // LINK ON GROUP
 
     let pointMenu = document.createElement('button');
     pointMenu.id = `point-for-${objGroup.id}`;
@@ -187,7 +218,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
 }
 
 
-function setTab (group, objTab, isCurrent) {
+function setTab (group, objTab, isCurrent, previousNode) {
     let tab = document.createElement('div');
     tab.id = `tab-${objTab.id}`
     tab.className = "tab";
@@ -277,7 +308,8 @@ function setTab (group, objTab, isCurrent) {
     let btnDescription = document.createElement('button');
     btnDescription.className = "btn-descr";
     btnDescription.title = "description";
-    btnDescription.innerHTML = '<svg class="icon"><use xlink:href="#ico-code"/></svg>';
+    btnDescription.innerHTML = '<svg class="icon"><use xlink:href="#ico-description"/></svg>';
+    btnDescription.style.visibility = isCurrent ? "hidden" : "";
     tab.append(btnDescription);
 
     let btnDuplicates = document.createElement('button');
@@ -293,7 +325,8 @@ function setTab (group, objTab, isCurrent) {
         tab.append(description);
     }
 
-    group.append(tab);
+    if (previousNode) previousNode.after(tab)
+    else group.append(tab)
 }
 
 

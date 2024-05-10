@@ -86,6 +86,14 @@ function deleteTab (tabID, session) {
                     document.querySelector(`#group-${sessID}`).remove();
                     document.querySelector(`#point-for-${sessID}`).remove();
                 })
+            } else {
+                db.sessions.where('date').equals(session).first().then( sess => {
+                    const sessID = sess.id;
+                    document.querySelector(
+                        `#group-${sessID} > .control-panel > .count`
+                    ).innerHTML = count;
+                    document.querySelector(`#point-for-${sessID} > .count`).innerHTML = count;
+                })
             }
         })
     });

@@ -7,7 +7,7 @@
         "128":"icons/tabs.svg"
     },
     "action": {},
-    "permissions": ["tabs"],
+    "permissions": ["tabs", "activeTab"],
     "background": {
         "service_worker": "js/background.js"
     }
