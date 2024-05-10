@@ -9,8 +9,10 @@
 //     description: "",
 // },
 
+
 const nodeMenu = document.querySelector("menu > .group-links")
 const nodeGroups = document.querySelector("main > .groups")
+const tempByExtractTags = /(#[\d\w]{1,})(?=\s|$)/g
 
 
 function setGroup (objGroup, isAfterCurrent=false) {
@@ -39,7 +41,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
                 elem.classList.remove("selected")
             })
             btnSelectAll.classList.remove("active");
-            btnSelectAll.querySelector("span").innerHTML = 0;
+            btnSelectAll.querySelector("span").innerText = 0;
     };
     panel.append(btnSelect);
 
@@ -54,7 +56,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
 
     if (isCurrent) {
         let inputTittle = document.createElement('h2');
-        inputTittle.innerHTML = nameGroup;
+        inputTittle.innerText = nameGroup;
         panel.append(inputTittle);
     } else {
         let inputTittle = document.createElement('input');
@@ -97,7 +99,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
 
     let count = document.createElement('div');
     count.className = "count";
-    count.innerHTML = objGroup.tabs.length;
+    count.innerText = objGroup.tabs.length;
     panel.append(count);
 
 
@@ -131,11 +133,11 @@ function setGroup (objGroup, isAfterCurrent=false) {
             if (select <= nselect) {
                 allTabs.forEach( elem => elem.classList.add("selected"));
                 btnSelectAll.classList.add("active");
-                btnSelectAll.querySelector("span").innerHTML = allTabs.length;
+                btnSelectAll.querySelector("span").innerText = allTabs.length;
             } else {
                 allTabs.forEach( elem => elem.classList.remove("selected"));
                 btnSelectAll.classList.remove("active");
-                btnSelectAll.querySelector("span").innerHTML = 0;
+                btnSelectAll.querySelector("span").innerText = 0;
             }
     }
     subPanel.append(btnSelectAll);
@@ -211,7 +213,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
 
     let pointMenuCount = document.createElement('div');
     pointMenuCount.className = "count";
-    pointMenuCount.innerHTML = objGroup.tabs.length;
+    pointMenuCount.innerText = objGroup.tabs.length;
     pointMenu.append(pointMenuCount);
 
     nodeMenu.append(pointMenu);
@@ -290,7 +292,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
     let btnTitle = document.createElement('button');
     btnTitle.className = "btn-title";
     btnTitle.title = objTab.title;
-    btnTitle.innerHTML = objTab.title;
+    btnTitle.innerText = objTab.title;
     btnTitle.addEventListener("mousedown", event => {
         if (isCurrent) {
             chrome.tabs.update(objTab.id, { active: true });
@@ -310,6 +312,16 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDescription.title = "description";
     btnDescription.innerHTML = '<svg class="icon"><use xlink:href="#ico-description"/></svg>';
     btnDescription.style.visibility = isCurrent ? "hidden" : "";
+    btnDescription.onclick = event => {
+            const editInput = tab.querySelector(".edit-description");
+            if (editInput){
+                description.className = objTab.description.length != 0 ? "description" : "description hide";
+                editInput.remove()
+            } else {
+                description.className = "description hide";
+                setInputDescription(objTab, tab, description)
+            }
+    }
     tab.append(btnDescription);
 
     let btnDuplicates = document.createElement('button');
@@ -318,15 +330,55 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDuplicates.innerHTML = '<svg class="icon"><use xlink:href="#ico-dup"/></svg>';
     tab.append(btnDuplicates);
 
-    if (objTab.description.length != 0) {
-        let description = document.createElement('div');
-        description.className = "description";
-        btnDuplicates.innerHTML = objTab.description;
+    let description;
+
+    if (!isCurrent) {
+        description = document.createElement('div');
+        description.className = 0 < objTab.description.length ? "description" : "description hide";
+        description.innerHTML = extractTags(encodeHTML(objTab.description));
+        setActionForTags(description)
         tab.append(description);
     }
 
     if (previousNode) previousNode.after(tab)
     else group.append(tab)
+}
+
+
+function setInputDescription(objTab, nodeTab, nodeDescr){
+
+    let form = document.createElement('div');
+    form.className = "edit-description";
+
+    const closeThisWidget = event => {
+        nodeDescr.className = objTab.description.length != 0 ? 
+            "description" : "description hide";
+        form.remove()
+    }
+
+    let textarea = document.createElement('textarea');
+    textarea.textContent = objTab.description;
+    textarea.rows = 7;
+    form.append(textarea);
+
+    let form__ok = document.createElement('button');
+    form__ok.innerText = "ok";
+    form__ok.onclick = event => {
+        const text = textarea.value.trim();
+        nodeDescr.innerHTML = extractTags(encodeHTML(text));
+        setActionForTags(nodeDescr)
+        objTab.description = text;
+        updateDescription(objTab.id, text);
+        closeThisWidget();
+    }
+    form.append(form__ok);
+
+    let form__cancel = document.createElement('button');
+    form__cancel.innerText = "cancel";
+    form__cancel.onclick = closeThisWidget;
+    form.append(form__cancel);
+    
+    nodeTab.append(form)
 }
 
 
@@ -351,3 +403,29 @@ function scrollToElement(element) {
     }
     requestAnimationFrame(animate);
 }
+
+
+function extractTags (description) {
+    // заменяет #tag на кнопку #tag
+    return description.replace(tempByExtractTags, match => {
+        return `<button class="open-tag" forsearch="${match}">${match}</button>`
+    })
+}
+
+
+function setActionForTags (nodeDescr) {
+    nodeDescr.querySelectorAll(".open-tag").forEach(btn => {
+        btn.onclick = event => {
+            const tag = event.currentTarget.getAttribute("forsearch");
+            console.log(`найти все вкладки с тегом ${tag}`)
+        }
+    })
+}
+
+
+function encodeHTML(str) {
+    return str.trim().replace(/[<>\&]/gim, function(i) {
+        return '&#' + i.charCodeAt(0) + ';';
+    });
+}
+  

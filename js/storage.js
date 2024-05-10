@@ -120,3 +120,10 @@ function checkingForEmptySession () {
     })
 }
 checkingForEmptySession()
+
+
+function updateDescription (id, description) {
+
+    db.tabs.update(id, { description });
+
+}

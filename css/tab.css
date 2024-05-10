@@ -89,6 +89,93 @@
     }
 }
 
+.tab > .description button.open-tag {
+    background-color: var(--color-canvas);
+    color: var(--color-accent);
+
+    &::selection {
+        background-color: var(--color-accent);
+        color: var(--color-widget);
+    }
+}
+
+.tab > .description.hide {
+    display: none;
+}
+
+.tab > .edit-description {
+    grid-column: 2 / -1;
+
+    display: grid;
+    grid-template-columns: 1fr 60px 60px;
+
+    background-color: var(--color-widget);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.tab > .edit-description > textarea {
+    grid-column: 1 / -1;
+    background-color: transparent;
+    color: var(--color-content);
+    padding: 15px;
+    resize: none;
+
+    &::selection {
+        background-color: var(--color-accent);
+        color: var(--color-widget);
+    }
+}
+
+.tab > .edit-description > button {
+    color: var(--color-content-80);
+    background-color: var(--color-widget);
+    grid-column: 2 / 3;
+    position: relative;
+    padding: 5px 0;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert();
+        opacity: 0;
+        transition: 200ms;
+    }
+
+    &:hover::after {
+        opacity: .05;
+    }
+
+    &:last-child {
+        grid-column: 3 / 4;
+    }
+}
+
+.tab > .edit-description > textarea::-webkit-scrollbar {
+	width: 2px;
+}
+
+.tab > .edit-description > textarea::-webkit-scrollbar-track {
+	background-color: transparent;
+    border-radius: 1px;
+}
+
+.tab > .edit-description > textarea::-webkit-scrollbar-thumb {
+	background-color: var(--color-content-30);
+    border-radius: 1px;
+}
+
+.tab > .edit-description > textarea::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+
 .tab > .sw > button,
 .tab > button {
     background-color: transparent;

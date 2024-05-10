@@ -76,7 +76,7 @@ async function addCurrentSession () {
 
     setGroup({
         id: "current",
-        name: "<b>Current</b>",
+        name: "Current",
         date,
         tabs: getCurrentTabs(tabs, date)
     })
