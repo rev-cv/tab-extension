@@ -20,8 +20,6 @@ function setGroup (objGroup, isAfterCurrent=false) {
     const nameGroup = objGroup.name.length === 0 ? objGroup.date : objGroup.name;
     const isCurrent = objGroup.id === "current";
 
-    let sortType = "none"; // содержит информацию о применененной сортировке вкладок
-
     let group = document.createElement('div');
     group.id = `group-${objGroup.id}`;
     group.className = "g";
@@ -36,12 +34,15 @@ function setGroup (objGroup, isAfterCurrent=false) {
     btnSelect.className = "btn-g-select";
     btnSelect.innerHTML = '<svg class="icon"><use xlink:href="#ico-select"/></svg>'
     btnSelect.onclick = event => {
-            group.classList.toggle("is-select-mode");
-            group.querySelectorAll(".tab").forEach( elem => {
-                elem.classList.remove("selected")
-            })
-            btnSelectAll.classList.remove("active");
-            btnSelectAll.querySelector("span").innerText = 0;
+            const tabs = group.querySelectorAll(".tab");
+            if (tabs.length != 0){
+                group.classList.toggle("is-select-mode");
+                tabs.forEach( elem => {
+                    elem.classList.remove("selected")
+                })
+                btnSelectAll.classList.remove("active");
+                btnSelectAll.querySelector("span").innerText = 0;
+            }
     };
     panel.append(btnSelect);
 
@@ -59,12 +60,27 @@ function setGroup (objGroup, isAfterCurrent=false) {
         inputTittle.innerText = nameGroup;
         panel.append(inputTittle);
     } else {
+
         let inputTittle = document.createElement('input');
         inputTittle.id = `H2FORM-${objGroup.id}`
         inputTittle.className = "edit-title";
         inputTittle.type = "text";
         inputTittle.value = nameGroup;
+        inputTittle.addEventListener('change', event => {
+            if (inputTittle.value.length === 0) {
+                inputTittle.value = objGroup.date;
+            }
+            renameGroup(objGroup.id, inputTittle.value);
+            pointMenuTitle.innerText = inputTittle.value;
+        });
         panel.append(inputTittle);
+
+        let viewDate = document.createElement('div');
+        viewDate.className = "about-date";
+        viewDate.innerHTML = objGroup.date.slice(0,10);
+        viewDate.title = objGroup.date;
+        panel.append(viewDate);
+
     }
     
     let btnSortAlp = document.createElement('button');
@@ -149,6 +165,14 @@ function setGroup (objGroup, isAfterCurrent=false) {
             <svg class="icon"><use xlink:href="#ico-this-win"/></svg>
             <span>open in this window</span>
         `;
+        btnOpenThis.onclick = event => {
+            group.querySelectorAll(".tab.selected").forEach( node => {
+                chrome.tabs.create({ 
+                    url: node.dataset.toUrl,
+                    active: false
+                });
+            })
+        };
         subPanel.append(btnOpenThis);
     } else {
         let btnSaveAndClose = document.createElement('button');
@@ -157,6 +181,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
             <svg class="icon"><use xlink:href="#ico-save"/></svg>
             <span>save & close</span>
         `;
+        btnSaveAndClose.onclick = saveSelectedTabs;
         subPanel.append(btnSaveAndClose);
     }
 
@@ -166,6 +191,20 @@ function setGroup (objGroup, isAfterCurrent=false) {
         <svg class="icon"><use xlink:href="#ico-new-win"/></svg>
         <span>open in new window</span>
     `;
+    btnOpenNew.onclick = event => {
+            const tabs = [...group.querySelectorAll(".tab.selected")];
+            if (tabs.length != 0) {
+                chrome.windows.create( { url: tabs[0].dataset.toUrl }, newWindow => {
+                    tabs.splice(1,).forEach( node => {
+                        chrome.tabs.create({
+                            url: node.dataset.toUrl,
+                            active: false,
+                            windowId: newWindow.id
+                        });
+                    });
+                })
+            }
+    }
     subPanel.append(btnOpenNew);
 
     let btnDelete = document.createElement('button');
@@ -174,6 +213,18 @@ function setGroup (objGroup, isAfterCurrent=false) {
         <svg class="icon"><use xlink:href="#ico-del"/></svg>
         <span>${ objGroup.id != "current" ? "delete" : "close" }</span>
     `;
+    btnDelete.onclick = event => {
+            if (isCurrent) {
+                group.querySelectorAll(".tab.selected").forEach( node => {
+                    chrome.tabs.remove(
+                        Number(node.id.replace("tab-", ""))
+                    );
+                })
+            } else {
+                deleteSelectedTabs(group)
+            }
+
+    }
     subPanel.append(btnDelete);
 
 
@@ -221,9 +272,12 @@ function setGroup (objGroup, isAfterCurrent=false) {
 
 
 function setTab (group, objTab, isCurrent, previousNode) {
+
     let tab = document.createElement('div');
     tab.id = `tab-${objTab.id}`
     tab.className = "tab";
+    tab.setAttribute("data-to-url", objTab.url);
+    tab.setAttribute("data-domain", objTab.domain);
 
     let sw = document.createElement('div');
     sw.className = "sw";
@@ -235,7 +289,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDelete.onclick = event => {
             if (isCurrent){
                 // закрыть закрыть вкладку в браузере
-                chrome.tabs.remove(objTab.id)
+                chrome.tabs.remove(objTab.id);
             } else {
                 // удалить вкладку из базы
                 tab.remove();

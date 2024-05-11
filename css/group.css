@@ -66,8 +66,21 @@ main > .groups > .g > .control-panel > h2 {
 }
 
 main > .groups > .g > .control-panel > h2 {
+    color: var(--color-accent);
+}
+
+main > .groups > .g > .control-panel > h2 {
     user-select: none;
     justify-content: flex-start;
+}
+
+main > .groups > .g > .control-panel > .about-date {
+    font-size: 10px;
+    color: var(--color-content-80);
+    padding: 3px 10px 0 10px;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 main > .groups > .g > .control-panel > .count {

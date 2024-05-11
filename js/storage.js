@@ -52,7 +52,70 @@ function saveCurrentSession () {
         }
     });
 }
- 
+
+
+async function saveSelectedTabs () {
+
+    const current = document.querySelector("#group-current");
+
+    const tabID = [...current.querySelectorAll(".tab.selected")]
+        .map( node => Number(node.id.replace("tab-", "")) )
+
+    if (tabID.length != 0) {
+
+        const date = getCurrentDate();
+        
+        let tabs = await chrome.tabs.query({ currentWindow: true })
+        tabs = tabs.filter( tab => tabID.includes(tab.id) );
+
+        if (tabs.length != 0) {
+            // сохранить сессию в базу
+            await db.sessions.bulkPut([{name: date, date: date}]);
+
+            // сохранить вкладки в базу
+            await db.tabs.bulkPut(
+                getCurrentTabs(tabs, date)
+            );
+
+            // закрыть вкладки в браузере
+            tabs.forEach( tab => chrome.tabs.remove(tab.id) );
+            // очистка вкладок в current должна произойти автоматически
+
+            // отобразить добавленную в базу группу 
+            let newGroup = await db.sessions.where('date').equals(date).first();
+            let newTabs = await db.tabs.where('date').equals(date).toArray();
+
+            setGroup({
+                id: newGroup.id,
+                name: date, 
+                date: date,
+                tabs: newTabs
+            }, true);
+
+        }
+    }
+}
+
+
+async function deleteSelectedTabs(nodeGroup) {
+
+    [...nodeGroup.querySelectorAll(".tab.selected")]
+        .map( node => {
+            const idn = Number(node.id.replace("tab-", ""));
+            node.remove();
+            return idn
+        })
+        .forEach( tabid => db.tabs.delete(tabid) )
+    
+    if (nodeGroup.querySelectorAll(".tab").length === 0){
+        // группа пуста —> удалить
+        const sessID = Number(nodeGroup.id.replace("group-", ""))
+        db.sessions.delete(sessID);
+        nodeGroup.remove()
+    }
+
+}
+
 
 function addAllSessions () {
     // отрисовывает все сессии
@@ -125,5 +188,11 @@ checkingForEmptySession()
 function updateDescription (id, description) {
 
     db.tabs.update(id, { description });
+
+}
+
+function renameGroup(id, name) {
+
+    db.sessions.update(id, { name });
 
 }

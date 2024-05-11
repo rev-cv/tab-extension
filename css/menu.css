@@ -157,5 +157,8 @@ menu > .menu-bottom > button > svg {
     height: 15px;
 }
 
-
+#point-for-current {
+    color: var(--color-accent);
+    font-weight: 700;
+}
 

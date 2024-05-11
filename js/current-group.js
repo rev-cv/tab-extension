@@ -99,8 +99,8 @@ async function updateCurrentSession__FULL () {
         getCurrentDate()
     );
 
-    counter1.innerHTML = tabs.length;
-    counter2.innerHTML = tabs.length;
+    counter1.innerText = tabs.length;
+    counter2.innerText = tabs.length;
     tabs.forEach( tab => setTab(current, tab, true))
 }
 
@@ -152,11 +152,11 @@ async function updateCurrentSession (IDTabUploaded) {
                 // обновление данных загруженной вкладки
                 const imgSel = `#tab-${modified[i-1].id} > .btn-ico-domain > img`;
                 const img = currentGroup.querySelector(imgSel);
-                img.src = elem.favIconUrl;
+                img.src = elem.favIconUrl != undefined ? elem.favIconUrl : "";
 
                 const titleSel = `#tab-${modified[i-1].id} > .btn-title`;
                 const title = currentGroup.querySelector(titleSel);
-                title.innerHTML = elem.title;
+                title.innerText = elem.title;
             }
 
             continue
@@ -180,8 +180,12 @@ async function updateCurrentSession (IDTabUploaded) {
     if (isMoveTo)
         sortTabs(currentGroup, modifiedID)
 
-    counter1.innerHTML = modified.length;
-    counter2.innerHTML = modified.length;
+    counter1.innerText = modified.length;
+    counter2.innerText = modified.length;
+
+    if (modified.length === 0) {
+        currentGroup.classList.remove("is-select-mode");
+    }
 }
 
 // обновление текущих вкладок при переходе на вкладку расширения
@@ -191,16 +195,21 @@ document.addEventListener('visibilitychange', updateCurrentSession__FULL);
 chrome.tabs.onRemoved.addListener(updateCurrentSession);
 
 // обновление текущих вкладок при открытии какой-то вкладки
-chrome.tabs.onCreated.addListener(tab => {
-    const tabId = tab.id;
+// chrome.tabs.onCreated.addListener(tab => {
+//     const tabId = tab.id;
+//     const onTabUpdated = (updatedTabId, changeInfo, updatedTab) => {
+//         if (updatedTabId === tabId && changeInfo.status === "complete") {
+//             // Вкладка полностью загружена
+//             updateCurrentSession(tabId)
+//             chrome.tabs.onUpdated.removeListener(onTabUpdated);
+//         }
+//     };
+//     // отслеживание окончания загрузки вкладки
+//     chrome.tabs.onUpdated.addListener(onTabUpdated);
+// });
 
-    const onTabUpdated = (updatedTabId, changeInfo, updatedTab) => {
-        if (updatedTabId === tabId && changeInfo.status === "complete") {
-            // Вкладка полностью загружена
-            updateCurrentSession(tabId)
-            chrome.tabs.onUpdated.removeListener(onTabUpdated);
-        }
-    };
-    // отслеживание окончания загрузки вкладки
-    chrome.tabs.onUpdated.addListener(onTabUpdated);
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete') {
+        updateCurrentSession();
+    }
 });
