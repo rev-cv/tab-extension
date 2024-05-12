@@ -10,28 +10,12 @@ menu > .logo {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin: 20px;
+    margin: 20px 20px 20px 30px;
+    overflow: hidden;
 }
 
-menu > .logo > .text {
-    font-size: 30px;
-    font-weight: 700;
-    background: linear-gradient(
-        145deg,
-        var(--color-content),
-        var(--color-content-30)
-    ); /* Цвет фона текста */
-    background: linear-gradient(150deg, #708090, #556B2F, #2E8B57);
-    background: linear-gradient(120deg, #556B2F, #A9A9A9);
-    color: transparent; /* Делаем текст прозрачным */
-    background-clip: text; /* Применяем цвет фона к тексту для остальных браузеров */
-}
-
-menu > .logo > svg {
-    --color-accent: var(--color-content-80);
-    width: 25px;
-    height: 25px;
-    margin-right: 10px;
+menu > .logo > img {
+    width: 70%;
 }
 
 menu > .group-links {

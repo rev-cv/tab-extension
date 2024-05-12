@@ -15,6 +15,10 @@
     margin: var(--mr) 10px;
 }
 
+.tab.disabled {
+    display: none;
+}
+
 .tab > .sw > button > svg,
 .tab > button > svg {
     width: 60%;

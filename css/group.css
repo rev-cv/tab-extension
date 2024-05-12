@@ -33,6 +33,10 @@ main > .groups > .g {
     margin-bottom: 30px;
 }
 
+.g.disabled {
+    display: none;
+}
+
 main > .groups > .g > .control-panel {
     display: flex;
     height: 30px;

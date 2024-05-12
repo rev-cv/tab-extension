@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icons/tabs.svg" />
+    <link rel="icon" type="image/svg+xml" href="/icons/tabex-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/reset.css"/>
     <link rel="stylesheet" type="text/css" href="css/frame.css"/>
     <link rel="stylesheet" type="text/css" href="css/menu.css"/>
     <link rel="stylesheet" type="text/css" href="css/group.css"/>
     <link rel="stylesheet" type="text/css" href="css/tab.css"/>
+    <link rel="stylesheet" type="text/css" href="css/filter.css"/>
+
     <title>TabEx</title>
 
     <script src="js/sprite-svg.js" defer></script>
@@ -22,9 +24,13 @@
 
     <div class="frame">
         <menu>
-            <div class="logo">
+            <!-- <div class="logo">
                 <svg class="icon"><use xlink:href="#ico-tabs"/></svg>
                 <div class="text">TabEx</div>
+            </div> -->
+
+            <div class="logo">
+                <img src="/icons/tabex-logo.png" alt="">
             </div>
 
             <div class="group-links">
@@ -51,9 +57,21 @@
         </menu>
 
         <main>
+
+            <div class="filter-panel">
+                <button id="back-filtration">
+                    <svg class="icon"><use xlink:href="#ico-back"/></svg>
+                </button>
+                <input type="text" id="text-input" placeholder="filter">
+                <button id="start-filtration">
+                    <svg class="icon"><use xlink:href="#ico-filter"/></svg>
+                </button>
+            </div>
+
             <div class="groups">
                 <!-- GROUPS -->
             </div>
+            
         </main>
     </div>
 

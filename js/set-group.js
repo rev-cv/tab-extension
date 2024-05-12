@@ -19,6 +19,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
 
     const nameGroup = objGroup.name.length === 0 ? objGroup.date : objGroup.name;
     const isCurrent = objGroup.id === "current";
+    let currentSort = "none";
 
     let group = document.createElement('div');
     group.id = `group-${objGroup.id}`;
@@ -80,20 +81,19 @@ function setGroup (objGroup, isAfterCurrent=false) {
         viewDate.innerHTML = objGroup.date.slice(0,10);
         viewDate.title = objGroup.date;
         panel.append(viewDate);
-
     }
-    
+
     let btnSortAlp = document.createElement('button');
     btnSortAlp.className = "btn-g-sort-alp";
     btnSortAlp.title = "sort alphabetically";
     btnSortAlp.innerHTML = '<svg class="icon"><use xlink:href="#ico-sort-alp"/></svg>';
     btnSortAlp.onclick = event => {
             // сортировка по title
-            btnSortAlp = btnSortAlp === "+alp" ? "-alp" : "+alp";
+            currentSort = currentSort === "+alp" ? "-alp" : "+alp";
             if (isCurrent) {
-                sortForCurrentByTitle(btnSortAlp === "-alp");
+                sortForCurrentByTitle(currentSort === "-alp");
             } else {
-                sortByTitle(group, objGroup.tabs, btnSortAlp === "-alp")
+                sortByTitle(group, objGroup.tabs, currentSort === "-alp")
             }
     }
     panel.append(btnSortAlp);
@@ -104,11 +104,11 @@ function setGroup (objGroup, isAfterCurrent=false) {
     btnSortWWW.innerHTML = '<svg class="icon"><use xlink:href="#ico-www"/></svg>';
     btnSortWWW.onclick = event => {
             // сортировка по domain
-            btnSortAlp = btnSortAlp === "+dom" ? "-dom" : "+dom";
+            currentSort = currentSort === "+dom" ? "-dom" : "+dom";
             if (isCurrent) {
-                sortForCurrentByDomain(btnSortAlp === "-dom");
+                sortForCurrentByDomain(currentSort === "-dom");
             } else {
-                sortByDomain(group, objGroup.tabs, btnSortAlp === "-dom")
+                sortByDomain(group, objGroup.tabs, currentSort === "-dom")
             }
     }
     panel.append(btnSortWWW);
@@ -276,7 +276,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
     let tab = document.createElement('div');
     tab.id = `tab-${objTab.id}`
     tab.className = "tab";
-    tab.setAttribute("data-to-url", objTab.url);
+    tab.setAttribute("data-to-url", objTab.url.toLowerCase());
     tab.setAttribute("data-domain", objTab.domain);
 
     let sw = document.createElement('div');
@@ -341,6 +341,10 @@ function setTab (group, objTab, isCurrent, previousNode) {
             '<svg class="icon"><use xlink:href="#ico-extension"/></svg>'
             : 
             '<svg class="icon"><use xlink:href="#ico-no-image"/></svg>'
+    btnDomain.onclick = event => {
+        filterInput.value = objTab.domain;
+        filtration();
+    }
     tab.append(btnDomain);
 
     let btnTitle = document.createElement('button');
@@ -382,6 +386,10 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDuplicates.className = "btn-dup";
     btnDuplicates.title = "duplicates";
     btnDuplicates.innerHTML = '<svg class="icon"><use xlink:href="#ico-dup"/></svg>';
+    btnDuplicates.onclick = event => {
+        filterInput.value = objTab.url;
+        filtration();
+    }
     tab.append(btnDuplicates);
 
     let description;
@@ -470,8 +478,8 @@ function extractTags (description) {
 function setActionForTags (nodeDescr) {
     nodeDescr.querySelectorAll(".open-tag").forEach(btn => {
         btn.onclick = event => {
-            const tag = event.currentTarget.getAttribute("forsearch");
-            console.log(`найти все вкладки с тегом ${tag}`)
+            filterInput.value = event.currentTarget.getAttribute("forsearch");
+            filtration();
         }
     })
 }

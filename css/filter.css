@@ -1,0 +1,34 @@
+
+main > .filter-panel {
+    display: grid;
+    grid-template-columns: 30px 1fr 30px 30px;
+    grid-template-rows: 30px;
+    grid-column-gap: 4px;
+    padding: 0 4px;
+    margin-bottom: 30px;
+}
+
+main > .filter-panel > button {
+    background-color: var(--color-widget);
+    border-radius: 4px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main > .filter-panel > button > svg {
+    width: 60%;
+    height: 60%;
+}
+
+main > .filter-panel > input {
+    width: 100%;
+    background-color: var(--color-widget);
+    color: var(--color-accent);
+    font-weight: 700;
+    padding: 0 10px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
