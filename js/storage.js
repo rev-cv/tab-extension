@@ -6,51 +6,38 @@ db.version(1).stores({
 });
 
 
-function saveCurrentSession () {
+async function saveCurrentSession () {
 
     const date = getCurrentDate();
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    let tabsForWrite = getCurrentTabs(tabs, date);
 
-    // сохранить вкладки
+    if (0 < tabsForWrite.length) {
+        // сохранить информацию о сессии
+        const sessID = await db.sessions.bulkPut([{name: date, date: date}]);
 
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-        const tabsForWrite = getCurrentTabs(tabs, date)
+        tabsForWrite.forEach( tab => {
+            chrome.tabs.remove(tab.id);
+            delete tab.id;
+        })
 
-        if (0 < tabsForWrite.length) {
-            
-            // сохранить информацию о сессии
-            db.sessions.bulkPut([{name: date, date: date}]).then(sessID => {
+        // сохранить информацию о вкладках сессии
+        await db.tabs.bulkPut(withoutID);
 
-                tabsForWrite.map(tab => {
-                    // между прочим закрыть вкладку
-                    chrome.tabs.remove(tab.id)
-        
-                    // удалить индекс заданный браузером
-                    delete tab.id;
-                    return tab;
-                })
+        // отобразить добавленную в базу новую сессию
+        const newTabs = await db.tabs.where('date').equals(date).toArray();
+        setGroup({
+            id: sessID,
+            name: date, 
+            date: date,
+            tabs: newTabs
+        }, true);
 
-                // отобразить добавленную в базу новую сессию
-                db.tabs.bulkPut(tabsForWrite).then( () => {
-
-                    db.tabs.where('date').equals(date).toArray().then(newTabs => {
-
-                        setGroup({
-                            id: sessID,
-                            name: date, 
-                            date: date,
-                            tabs: newTabs
-                        }, true);
-
-                    })
-                })
-
-                // очистить вкладки из session current
-                document.querySelectorAll("#group-current > .tab").forEach(old_tab => {
-                    old_tab.remove()
-                })
-            })
-        }
-    });
+        // очистить вкладки из session current
+        document.querySelectorAll("#group-current > .tab").forEach(old_tab => {
+            old_tab.remove()
+        })
+    }
 }
 
 
@@ -112,6 +99,7 @@ async function deleteSelectedTabs(nodeGroup) {
         const sessID = Number(nodeGroup.id.replace("group-", ""))
         db.sessions.delete(sessID);
         nodeGroup.remove()
+        document.querySelector(`#point-for-${sessID}`).remove();
     }
 
 }
@@ -194,5 +182,97 @@ function updateDescription (id, description) {
 function renameGroup(id, name) {
 
     db.sessions.update(id, { name });
+
+}
+
+
+async function saveImportData (groups) {
+
+    let sessions = [];
+    let tabs = [];
+    let groupDate = [];
+
+    groups.forEach( g => {
+        sessions.push({name: g.name, date: g.date});
+        tabs = [...tabs, ...g.tabs];
+        groupDate.push(g.date);
+    })
+
+    await db.tabs.bulkPut(tabs);
+    await db.sessions.bulkPut(sessions);
+
+    let groupFromDB = [];
+
+    for (let i = 0; i < groupDate.length; i++) {
+        const g = await db.sessions.where('date').equals(groupDate[i]).first();
+        g.tabs = await db.tabs.where('date').equals(groupDate[i]).toArray();
+        groupFromDB.push(g);
+    }
+
+    return groupFromDB;
+
+}
+
+async function findIcon (domain) {
+
+    const tab = await db.tabs.filter( tab => 
+        tab.icon != "" && tab.icon != undefined && tab.domain === domain
+    ).first();
+
+    return tab === undefined ? "" : tab.icon
+}
+
+async function detectiveIcons (domain, icon) {
+    // добавляет иконки всем вкладкам с доментом у которых иконка отсутствует 
+
+    const tabs = await db.tabs.filter( 
+        tab => tab.icon === "" && tab.domain === domain
+    ).toArray();
+
+    tabs.forEach( tab => {
+        db.tabs.update(tab.id, { icon });
+
+        document.querySelector(`#tab-${tab.id} > .btn-ico-domain`).innerHTML = `
+            <img src="${icon}" />
+        `
+    })
+
+}
+
+
+async function exportInOneTab (event) {
+    let text = "";
+
+    const sessions = await db.sessions.toArray();
+
+    for (let i = 0; i < sessions.length; i++) {
+        const tabs = await db.tabs.where('date').equals(sessions[i].date).toArray();
+        tabs.forEach( tab => text += `${tab.url} | ${tab.title}\n`);
+        text += "\n";
+    }
+    
+    document.querySelector("#popup-export > textarea").textContent = text.trim();
+}
+
+
+async function exportInTabEx (event) {
+    let text = "";
+
+    const sessions = await db.sessions.toArray();
+
+    for (let i = 0; i < sessions.length; i++) {
+        const tabs = await db.tabs.where('date').equals(sessions[i].date).toArray();
+
+        text += `## ${sessions[i].name}\n`;
+        text += `date: ${sessions[i].date}\n\n`;
+        
+        tabs.forEach( tab => {
+            text += `- [${tab.title}](${tab.url}) ${tab.description}\n`
+        });
+
+        text += "\n";
+    }
+    
+    document.querySelector("#popup-export > textarea").textContent = text.trim();
 
 }

@@ -1,8 +1,7 @@
 
-const regexDomain = /^(?:https?|ftp):\/\/([^\/]+)/;
 
 function getDomain (url) {
-    let domain = regexDomain.exec(url);
+    let domain = /^(?:https?|ftp):\/\/([^\/]+)/.exec(url);
 
     if (domain === null) {
         if ( url.includes("file:///") ) {
@@ -13,6 +12,8 @@ function getDomain (url) {
             domain = ["", "extensions"];
         } else if (url.includes("chrome://newtab/")) {
             domain = ["", "newtab"];
+        } else if (url.includes("chrome://downloads/")) {
+            domain = ["", "downloads"];
         }
     }
     return domain
@@ -26,7 +27,7 @@ function getCurrentTabs(tabs, date){
     tabs.forEach( tab => {
         if (!tab.pinned) {
 
-            const domain = getDomain(tab.url)
+            const domain = getDomain(tab.url);
 
             if (domain != null) {
 
@@ -59,8 +60,8 @@ function getCurrentDate () {
     // стандартизированная функция получения текущего времени
     const date = new Date();
     const y = date.getFullYear();
-    const m = String(date.getMonth()).padStart(2,0);
-    const d = String(date.getDay()).padStart(2,0);
+    const m = String(date.getMonth()+1).padStart(2,0);
+    const d = String(date.getDate()).padStart(2,0);
     const H = String(date.getHours()).padStart(2,0);
     const M = String(date.getMinutes()).padStart(2,0);
     const S = String(date.getSeconds()).padStart(2,0);
@@ -211,5 +212,13 @@ chrome.tabs.onRemoved.addListener(updateCurrentSession);
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete') {
         updateCurrentSession();
+
+        if (tab.favIconUrl) {
+            detectiveIcons(
+                getDomain(tab.url)[1],
+                tab.favIconUrl
+            )
+        }
+
     }
 });

@@ -7,7 +7,7 @@
         "128":"icons/tabex-icon.png"
     },
     "action": {},
-    "permissions": ["tabs", "windows", "activeTab"],
+    "permissions": ["tabs", "windows"],
     "background": {
         "service_worker": "js/background.js"
     }

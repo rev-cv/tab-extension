@@ -15,6 +15,25 @@ main > .filter-panel > button {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: var(--color-widget);
+        filter: invert();
+        opacity: 0;
+        transition: 200ms;
+    }
+
+    &:hover:after {
+        opacity: .05;
+    }
 }
 
 main > .filter-panel > button > svg {

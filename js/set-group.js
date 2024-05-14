@@ -12,7 +12,6 @@
 
 const nodeMenu = document.querySelector("menu > .group-links")
 const nodeGroups = document.querySelector("main > .groups")
-const tempByExtractTags = /(#[\d\w]{1,})(?=\s|$)/g
 
 
 function setGroup (objGroup, isAfterCurrent=false) {
@@ -469,7 +468,7 @@ function scrollToElement(element) {
 
 function extractTags (description) {
     // заменяет #tag на кнопку #tag
-    return description.replace(tempByExtractTags, match => {
+    return description.replace(/(#[\d\w]{1,})(?=\s|$)/g, match => {
         return `<button class="open-tag" forsearch="${match}">${match}</button>`
     })
 }
