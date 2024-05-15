@@ -33,6 +33,9 @@ function getCurrentTabs(tabs, date){
 
                 const isTabEx = domain[1] === "chrome-extension" && tab.title === "TabEx";
 
+                // достать описание, если оно было задано для текущей вкладки
+                const descr = dataDescriptionForCurrentTabs.filter( e => e.id === tab.id);
+
                 if (!isTabEx) {
                     currentTabs.push({
                         id: tab.id,
@@ -41,7 +44,7 @@ function getCurrentTabs(tabs, date){
                         icon: tab.favIconUrl,
                         date,
                         domain: domain[1],
-                        description: "",
+                        description: descr.length === 1 ? descr[0].description : "",
                     })
                 }
             } else {
@@ -103,6 +106,8 @@ async function updateCurrentSession__FULL () {
     counter1.innerText = tabs.length;
     counter2.innerText = tabs.length;
     tabs.forEach( tab => setTab(current, tab, true))
+
+    if (filteringModeEnabled) filtrationCurrent(presetfilter, appliedFilters)
 }
 
 
@@ -186,6 +191,96 @@ async function updateCurrentSession (IDTabUploaded) {
 
     if (modified.length === 0) {
         currentGroup.classList.remove("is-select-mode");
+    }
+
+    if (filteringModeEnabled) filtrationCurrent(presetfilter, appliedFilters)
+}
+
+
+async function filtrationCurrent (preset, conditions) {
+
+    const currentTabs = await chrome.tabs.query({ currentWindow: true });
+    let tabs = [];
+
+    switch (preset) {
+
+        case "td": {                
+            tabs = currentTabs.filter( elem => {
+                const t = elem.title.toLowerCase();
+                let d = dataDescriptionForCurrentTabs.find( descr => 
+                    descr.id === elem.id
+                )
+                if (d === undefined) {
+                    return conditions.some( c => t.includes(c) )
+                } else {
+                    d = d.toLowerCase();
+                    return conditions.some( c => t.includes(c) || d.includes(c) )
+                }
+            });
+            break;
+        }
+
+        case "tag": {
+            const cons = conditions.map( c => c.startsWith("#") ? c : "#" + c);
+            tabs = currentTabs.filter( elem => {
+                let d = dataDescriptionForCurrentTabs.find( descr => 
+                    descr.id === elem.id
+                )
+                if (d === undefined) {
+                    return false
+                } else {
+                    d = d.toLowerCase();
+                    return cons.some( d.includes(c) )
+                }
+            });
+            break;
+        }
+        case "descr": {
+            tabs = currentTabs.filter( elem => {
+                let d = dataDescriptionForCurrentTabs.find( descr => 
+                    descr.id === elem.id
+                )
+                if (d === undefined) {
+                    return false
+                } else {
+                    d = d.toLowerCase();
+                    return conditions.some( c => d.includes(c) )
+                }
+            });
+            break;
+        }
+        case "title": {
+            tabs = currentTabs.filter( elem => {
+                const t = elem.title.toLowerCase();
+                return conditions.some( c => t.includes(c) )
+            });
+        }
+        case "domain": {
+            tabs = currentTabs.filter( elem => {
+                const d = getDomain(elem.url);
+                return conditions.some( c => d === c )
+            })
+        }
+        case "url": {
+            tabs = currentTabs.filter( elem => 
+                conditions.some( c => elem.url.includes(c) )
+            )
+        }
+    }
+
+    if (tabs.length > 0) {
+        const tabID = tabs.map(item => `#tab-${item.id}`).join(", ");
+
+        console.log(tabID)
+
+
+        document.querySelectorAll(`#group-current > .tab:not(${tabID})`).forEach( node => {
+            node.classList.add("disabled")
+        })
+
+        document.querySelectorAll(`#group-current > ${tabID}`).forEach( node => {
+            node.classList.remove("disabled")
+        })
     }
 }
 

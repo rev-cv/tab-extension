@@ -1,5 +1,6 @@
 
 const filterInput = document.querySelector("#text-input");
+const backFilter = document.querySelector("#back-filtration");
 
 function sortTabs (group, list) {
 
@@ -117,71 +118,61 @@ async function sortForCurrentByDomain(isReverse) {
 }
 
 
-async function backFiltration (event) {
-    document.querySelectorAll(".g").forEach( node => {
-        node.classList.remove("disabled")
-    })
-    document.querySelectorAll(".tab").forEach( node => {
-        node.classList.remove("disabled")
-    })
+let presetfilter = "td";
+let filteringModeEnabled = false;
+let appliedFilters = [];
 
-    document.querySelector("#back-filtration").style.visibility = "hidden";
+
+async function backFiltration (event) {
+    const show = ".g.disabled, .tab.disabled, .group-links > .disabled";
+    document.querySelectorAll(show).forEach( node => {
+        node.classList.remove("disabled")
+    })
+    backFilter.style.visibility = "hidden";
     filterInput.value = "";
+    filteringModeEnabled = false;
+    appliedFilters = [];
 }
 
 
 async function filtration (event) {
 
-    const textFilter = filterInput.value.trim().toLowerCase();
+    appliedFilters = filterInput.value
+        .toLowerCase()
+        .split(",")
+        .map( c => c.trim() )
+        .filter( c => c != "" );
 
-    if (textFilter.length === 0) {
+    if (appliedFilters.length === 0) {
         backFiltration()
         return undefined
     }
 
-    await iterationOverTabs(textFilter);
+    filteringModeEnabled = true;
 
-    document.querySelectorAll(".g").forEach( group => {
-        if (group.querySelectorAll(".tab:not(.disabled)").length === 0){
-            group.classList.add("disabled")
-        } else {
-            group.classList.remove("disabled")
-        }
-    })
+    const [tabs, groups, points] = await filteringByCondition(presetfilter, appliedFilters);
 
-    document.querySelector("#back-filtration").style.visibility = "visible";
-}
-
-async function iterationOverTabs (text) {
-    const tabs = document.querySelectorAll(".tab");
-    for (let index = 0; index < tabs.length; index++) {
-        matchFilter(tabs[index], text)
-    }
-}
-
-async function matchFilter (nodeTab, text) {
-
-    let isMatch = false;
-
-    if (nodeTab.querySelector(".btn-title").title.toLowerCase().includes(text)) {
-        isMatch = true;
-    } else if (nodeTab.dataset.toUrl.includes(text)) {
-        isMatch = true;
+    if (tabs.length === 0) {
+        document.querySelectorAll(".g, .menu-bottom > button").forEach( node => {
+            node.classList.add("disabled")
+        })
     } else {
-        const descr = nodeTab.querySelector(".description");
-        if (descr != null) {
-            if (descr.innerText.toLowerCase().includes(text)) {
-                isMatch = true;
-            }
-        }
+        const hide = `.tab:not(${tabs}), .g:not(${groups}), button:not(${points})`;
+        const show = `${tabs}, ${groups}, ${points}, #point-for-current, #group-current`;
+        
+        document.querySelectorAll(hide).forEach( node => {
+            node.classList.add("disabled")
+        })
+
+        document.querySelectorAll(show).forEach( node => {
+            node.classList.remove("disabled")
+        })
     }
-    
-    if (!isMatch) {
-        nodeTab.classList.add("disabled")
-    } else {
-        nodeTab.classList.remove("disabled")
-    }
+
+    filtrationCurrent(presetfilter, appliedFilters);
+    backFilter.style.visibility = "visible";
 }
+
 
 document.querySelector("#start-filtration").onclick = filtration;
 document.querySelector("#back-filtration").onclick = backFiltration;
@@ -192,3 +183,21 @@ filterInput.addEventListener('keydown', event => {
 window.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') backFiltration()
 });
+
+
+document.querySelectorAll(".presets > button").forEach( (btn, index, array) => {
+    btn.onclick = event => {
+        array.forEach( bbb => bbb.classList.remove("active") );
+        event.currentTarget.classList.add("active");
+        presetfilter = event.currentTarget.dataset.preset;
+    }   
+})
+
+function setPreset (preset) {
+    document.querySelectorAll(".presets > button").forEach( btn => 
+        btn.classList.remove("active")
+    )
+    document.querySelector(`.presets > button[data-preset="${preset}"]`)
+        .classList.add("active");
+    presetfilter = preset;
+}

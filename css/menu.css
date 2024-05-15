@@ -58,6 +58,10 @@ menu > .group-links > button {
     }
 }
 
+menu > .group-links > button.disabled {
+    display: none;
+}
+
 menu > .group-links > button > .title {
     white-space: nowrap;
     overflow: hidden;

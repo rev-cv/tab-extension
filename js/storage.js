@@ -22,7 +22,7 @@ async function saveCurrentSession () {
         })
 
         // сохранить информацию о вкладках сессии
-        await db.tabs.bulkPut(withoutID);
+        await db.tabs.bulkPut(tabsForWrite);
 
         // отобразить добавленную в базу новую сессию
         const newTabs = await db.tabs.where('date').equals(date).toArray();
@@ -63,10 +63,6 @@ async function saveSelectedTabs () {
             await db.tabs.bulkPut(
                 getCurrentTabs(tabs, date)
             );
-
-            // закрыть вкладки в браузере
-            tabs.forEach( tab => chrome.tabs.remove(tab.id) );
-            // очистка вкладок в current должна произойти автоматически
 
             // отобразить добавленную в базу группу 
             let newGroup = await db.sessions.where('date').equals(date).first();
@@ -275,4 +271,75 @@ async function exportInTabEx (event) {
     
     document.querySelector("#popup-export > textarea").textContent = text.trim();
 
+}
+
+
+async function filteringByCondition (preset, conditions) {
+    
+    const currentTabs = await chrome.tabs.query({ currentWindow: true });
+
+    let tabs = [];
+
+    switch (preset) {
+
+        case "td": {                
+            tabs = await db.tabs.filter( elem => {
+                const t = elem.title.toLowerCase();
+                const d = elem.description.toLowerCase();
+                return conditions.some( c => t.includes(c) || d.includes(c) )
+            }).toArray();
+            break;
+        }
+
+        case "title": {
+            tabs = await db.tabs.filter( elem => {
+                const t = elem.title.toLowerCase();
+                return cons.some( c => t.includes(c))
+            }).toArray();
+            break;
+        }
+        
+        case "tag": {
+            const cons = conditions.map( c => c.startsWith("#") ? c : "#" + c);
+
+            tabs = await db.tabs.filter( elem => {
+                const d = elem.description.toLowerCase();
+                return cons.some( c => d.includes(c))
+            }).toArray();
+            break;
+        }
+
+        case "descr": {
+            tabs = await db.tabs.filter( elem => {
+                const d = elem.description.toLowerCase();
+                return conditions.some( c => d.includes(c))
+            }).toArray();
+            break;
+        }
+
+        case "domain": {
+            tabs = await db.tabs.filter( elem => {
+                const d = elem.domain.toLowerCase();
+                return conditions.some( c => d === c )
+            }).toArray();
+            break;
+        }
+
+        case "url": {
+            tabs = await db.tabs.filter( elem => {
+                return conditions.some( c => elem.url.includes(c) )
+            }).toArray();
+            break;
+        }
+    }
+
+    const dates = Array.from(new Set( tabs.map(item => item.date) ))
+
+    const sess = await db.sessions.where('date').anyOfIgnoreCase(dates).primaryKeys();
+
+    return [
+        tabs.map(item => `#tab-${item.id}`).join(", "), 
+        sess.map(item => `#group-${item}`).join(", "),
+        sess.map(item => `#point-for-${item}`).join(", "),
+    ]
 }

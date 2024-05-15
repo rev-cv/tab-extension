@@ -79,7 +79,7 @@ async function importData(){
         // группы добавляются в БД
         const groups = await saveImportData(addedGroup);
 
-        groups.reverse().forEach( group => {
+        groups.forEach( group => {
             setGroup(group, true)
         })
 

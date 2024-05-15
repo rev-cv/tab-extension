@@ -1,11 +1,24 @@
 
+main {
+    position: relative;
+    margin-top: 0;
+}
 main > .filter-panel {
     display: grid;
     grid-template-columns: 30px 1fr 30px 30px;
     grid-template-rows: 30px;
-    grid-column-gap: 4px;
+    grid-gap: 4px;
     padding: 0 4px;
-    margin-bottom: 30px;
+
+    margin: -20px -20px 30px -20px;
+    padding: 10px 20px 10px 20px;
+    background-color: var(--color-canvas);
+
+    position: sticky;
+    top: -20px;
+    z-index: 1000; 
+
+    box-shadow: 0 10px 10px var(--color-canvas);
 }
 
 main > .filter-panel > button {
@@ -49,5 +62,29 @@ main > .filter-panel > input {
     padding: 0 10px;
     font-size: 14px;
     border-radius: 4px;
+
+    &::selection {
+        background-color: var(--color-accent);
+        color: var(--color-canvas);
+    }
 }
 
+
+main > .filter-panel > .presets {
+    grid-column: 2 / -1;
+}
+
+main > .filter-panel > .presets > button {
+    background-color: var(--color-widget);
+    color: var(--color-content);
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-right: 1px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+main > .filter-panel > .presets > button.active {
+    background-color: var(--color-accent);
+    color: var(--color-canvas);
+}

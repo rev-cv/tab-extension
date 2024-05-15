@@ -12,6 +12,7 @@
 
 const nodeMenu = document.querySelector("menu > .group-links")
 const nodeGroups = document.querySelector("main > .groups")
+let dataDescriptionForCurrentTabs = [];
 
 
 function setGroup (objGroup, isAfterCurrent=false) {
@@ -178,7 +179,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
         btnSaveAndClose.className = "select-open-this";
         btnSaveAndClose.innerHTML = `
             <svg class="icon"><use xlink:href="#ico-save"/></svg>
-            <span>save & close</span>
+            <span>save</span>
         `;
         btnSaveAndClose.onclick = saveSelectedTabs;
         subPanel.append(btnSaveAndClose);
@@ -240,14 +241,6 @@ function setGroup (objGroup, isAfterCurrent=false) {
     }
     
 
-    // место вставки группы
-    if (isAfterCurrent) {
-        document.querySelector("#group-current").after(group)
-    } else {
-        nodeGroups.append(group)
-    }
-
-
     // LINK ON GROUP
 
     let pointMenu = document.createElement('button');
@@ -266,7 +259,15 @@ function setGroup (objGroup, isAfterCurrent=false) {
     pointMenuCount.innerText = objGroup.tabs.length;
     pointMenu.append(pointMenuCount);
 
-    nodeMenu.append(pointMenu);
+    
+    // место вставки группы
+    if (isAfterCurrent) {
+        document.querySelector("#point-for-current").after(pointMenu)
+        document.querySelector("#group-current").after(group)
+    } else {
+        nodeMenu.append(pointMenu);
+        nodeGroups.append(group)
+    }
 }
 
 
@@ -277,6 +278,8 @@ function setTab (group, objTab, isCurrent, previousNode) {
     tab.className = "tab";
     tab.setAttribute("data-to-url", objTab.url.toLowerCase());
     tab.setAttribute("data-domain", objTab.domain);
+
+    if (isCurrent) tab.setAttribute("data-description", "")
 
     let sw = document.createElement('div');
     sw.className = "sw";
@@ -341,6 +344,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
             : 
             '<svg class="icon"><use xlink:href="#ico-no-image"/></svg>'
     btnDomain.onclick = event => {
+        setPreset("domain")
         filterInput.value = objTab.domain;
         filtration();
     }
@@ -368,7 +372,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDescription.className = "btn-descr";
     btnDescription.title = "description";
     btnDescription.innerHTML = '<svg class="icon"><use xlink:href="#ico-description"/></svg>';
-    btnDescription.style.visibility = isCurrent ? "hidden" : "";
     btnDescription.onclick = event => {
             const editInput = tab.querySelector(".edit-description");
             if (editInput){
@@ -376,7 +379,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
                 editInput.remove()
             } else {
                 description.className = "description hide";
-                setInputDescription(objTab, tab, description)
+                setInputDescription(objTab, tab, description, isCurrent)
             }
     }
     tab.append(btnDescription);
@@ -391,22 +394,18 @@ function setTab (group, objTab, isCurrent, previousNode) {
     }
     tab.append(btnDuplicates);
 
-    let description;
-
-    if (!isCurrent) {
-        description = document.createElement('div');
-        description.className = 0 < objTab.description.length ? "description" : "description hide";
-        description.innerHTML = extractTags(encodeHTML(objTab.description));
-        setActionForTags(description)
-        tab.append(description);
-    }
+    let description = document.createElement('div');
+    description.className = 0 < objTab.description.length ? "description" : "description hide";
+    description.innerHTML = extractTags(encodeHTML(objTab.description));
+    setActionForTags(description)
+    tab.append(description);
 
     if (previousNode) previousNode.after(tab)
     else group.append(tab)
 }
 
 
-function setInputDescription(objTab, nodeTab, nodeDescr){
+function setInputDescription(objTab, nodeTab, nodeDescr, isCurrent){
 
     let form = document.createElement('div');
     form.className = "edit-description";
@@ -429,7 +428,15 @@ function setInputDescription(objTab, nodeTab, nodeDescr){
         nodeDescr.innerHTML = extractTags(encodeHTML(text));
         setActionForTags(nodeDescr)
         objTab.description = text;
-        updateDescription(objTab.id, text);
+
+        if (isCurrent){
+            dataDescriptionForCurrentTabs.push({
+                id: objTab.id,
+                description: text
+            })
+        } else {
+            updateDescription(objTab.id, text);
+        }
         closeThisWidget();
     }
     form.append(form__ok);
