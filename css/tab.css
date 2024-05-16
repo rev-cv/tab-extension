@@ -90,17 +90,18 @@
 
     &::selection {
         background-color: var(--color-accent);
-        color: var(--color-widget);
+        color: var(--color-canvas);
     }
 }
 
-.tab > .description button.open-tag {
+.tab > .description button.open-tag,
+.tab > .description button.open-link {
     background-color: var(--color-canvas);
     color: var(--color-accent);
 
     &::selection {
         background-color: var(--color-accent);
-        color: var(--color-widget);
+        color: var(--color-canvas);
     }
 }
 

@@ -294,7 +294,7 @@ async function filteringByCondition (preset, conditions) {
         case "title": {
             tabs = await db.tabs.filter( elem => {
                 const t = elem.title.toLowerCase();
-                return cons.some( c => t.includes(c))
+                return conditions.some( c => t.includes(c))
             }).toArray();
             break;
         }
@@ -326,8 +326,10 @@ async function filteringByCondition (preset, conditions) {
         }
 
         case "url": {
+            
             tabs = await db.tabs.filter( elem => {
-                return conditions.some( c => elem.url.includes(c) )
+                const u = elem.url.toLowerCase();
+                return conditions.some( c => u.includes(c) )
             }).toArray();
             break;
         }

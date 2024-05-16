@@ -1,22 +1,16 @@
 
 
 function getDomain (url) {
-    let domain = /^(?:https?|ftp):\/\/([^\/]+)/.exec(url);
+    let domain = /^(?:https?|ftp?|chrome?):\/\/([^\/]+)/.exec(url);
 
     if (domain === null) {
         if ( url.includes("file:///") ) {
             domain = ["", "file"];
         } else if ( url.includes("chrome-extension://") ) {
             domain = ["", "chrome-extension"];
-        } else if ( url.includes("chrome://extensions/") ) {
-            domain = ["", "extensions"];
-        } else if (url.includes("chrome://newtab/")) {
-            domain = ["", "newtab"];
-        } else if (url.includes("chrome://downloads/")) {
-            domain = ["", "downloads"];
         }
     }
-    return domain
+    return domain === null ? ["", "undefined"] : domain
 }
 
 function getCurrentTabs(tabs, date){
@@ -262,18 +256,16 @@ async function filtrationCurrent (preset, conditions) {
             })
         }
         case "url": {
-            tabs = currentTabs.filter( elem => 
-                conditions.some( c => elem.url.includes(c) )
-            )
+            tabs = currentTabs.filter( elem => {
+                const u = elem.url.toLowerCase();
+                return conditions.some( c => u.includes(c) )
+            })
         }
     }
 
     if (tabs.length > 0) {
         const tabID = tabs.map(item => `#tab-${item.id}`).join(", ");
-
-        console.log(tabID)
-
-
+        
         document.querySelectorAll(`#group-current > .tab:not(${tabID})`).forEach( node => {
             node.classList.add("disabled")
         })

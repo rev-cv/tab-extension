@@ -1,6 +1,16 @@
 
 const filterInput = document.querySelector("#text-input");
 const backFilter = document.querySelector("#back-filtration");
+document.querySelector("#start-filtration").onclick = filtration;
+backFilter.onclick = backFiltration;
+backFilter.style.visibility = "hidden";
+filterInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') filtration()
+});
+window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') backFiltration()
+});
+
 
 function sortTabs (group, list) {
 
@@ -132,6 +142,14 @@ async function backFiltration (event) {
     filterInput.value = "";
     filteringModeEnabled = false;
     appliedFilters = [];
+
+    nodeGroups.querySelectorAll(".tab.selected").forEach( node => {
+        node.classList.remove("selected")
+    })
+
+    nodeGroups.querySelectorAll(".g.is-select-mode").forEach( node => {
+        node.classList.remove("is-select-mode")
+    })
 }
 
 
@@ -171,18 +189,15 @@ async function filtration (event) {
 
     filtrationCurrent(presetfilter, appliedFilters);
     backFilter.style.visibility = "visible";
+
+    nodeGroups.querySelectorAll(".tab.selected").forEach( node => {
+        node.classList.remove("selected")
+    })
+
+    nodeGroups.querySelectorAll(".g.is-select-mode").forEach( node => {
+        node.classList.remove("is-select-mode")
+    })
 }
-
-
-document.querySelector("#start-filtration").onclick = filtration;
-document.querySelector("#back-filtration").onclick = backFiltration;
-document.querySelector("#back-filtration").style.visibility = "hidden";
-filterInput.addEventListener('keydown', event => {
-    if (event.key === 'Enter') filtration()
-});
-window.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') backFiltration()
-});
 
 
 document.querySelectorAll(".presets > button").forEach( (btn, index, array) => {
@@ -192,6 +207,7 @@ document.querySelectorAll(".presets > button").forEach( (btn, index, array) => {
         presetfilter = event.currentTarget.dataset.preset;
     }   
 })
+
 
 function setPreset (preset) {
     document.querySelectorAll(".presets > button").forEach( btn => 

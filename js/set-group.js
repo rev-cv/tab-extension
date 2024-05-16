@@ -133,7 +133,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
         <span>0</span>
     `;
     btnSelectAll.onclick = () => {
-            const allTabs = group.querySelectorAll(".tab");
+            const allTabs = group.querySelectorAll(".tab:not(.disabled)");
 
             let select = 0;
             let nselect = 0;
@@ -359,8 +359,8 @@ function setTab (group, objTab, isCurrent, previousNode) {
             chrome.tabs.update(objTab.id, { active: true });
         } else if (event.button === 0) {
             chrome.tabs.create({ url: objTab.url });
-            tab.remove();
-            deleteTab(objTab.id, objTab.date);
+            // tab.remove();
+            // deleteTab(objTab.id, objTab.date);
         } else if (event.button === 1) {
             chrome.tabs.create({ url: objTab.url, active: false });
             // updateCurrentSession()
@@ -389,6 +389,7 @@ function setTab (group, objTab, isCurrent, previousNode) {
     btnDuplicates.title = "duplicates";
     btnDuplicates.innerHTML = '<svg class="icon"><use xlink:href="#ico-dup"/></svg>';
     btnDuplicates.onclick = event => {
+        setPreset("url");
         filterInput.value = objTab.url;
         filtration();
     }
@@ -396,8 +397,8 @@ function setTab (group, objTab, isCurrent, previousNode) {
 
     let description = document.createElement('div');
     description.className = 0 < objTab.description.length ? "description" : "description hide";
-    description.innerHTML = extractTags(encodeHTML(objTab.description));
-    setActionForTags(description)
+    description.innerHTML = extractTagsAndLinks(encodeHTML(objTab.description)).replaceAll("\n", "<br>");
+    setActionForBtnsInDescription(description)
     tab.append(description);
 
     if (previousNode) previousNode.after(tab)
@@ -425,8 +426,8 @@ function setInputDescription(objTab, nodeTab, nodeDescr, isCurrent){
     form__ok.innerText = "ok";
     form__ok.onclick = event => {
         const text = textarea.value.trim();
-        nodeDescr.innerHTML = extractTags(encodeHTML(text));
-        setActionForTags(nodeDescr)
+        nodeDescr.innerHTML = extractTagsAndLinks(encodeHTML(text)).replaceAll("\n", "<br>");
+        setActionForBtnsInDescription(nodeDescr)
         objTab.description = text;
 
         if (isCurrent){
@@ -453,7 +454,7 @@ function setInputDescription(objTab, nodeTab, nodeDescr, isCurrent){
 function scrollToElement(element) {
     const container = nodeGroups.parentNode;
     let startScrollTop = container.scrollTop;
-    let distance = element.offsetTop - container.scrollTop - 20;
+    let distance = element.offsetTop - container.scrollTop - 90;
     let duration = 500; // Длительность анимации в миллисекундах
     let startTime = null;
   
@@ -473,19 +474,31 @@ function scrollToElement(element) {
 }
 
 
-function extractTags (description) {
+function extractTagsAndLinks (description) {
     // заменяет #tag на кнопку #tag
     return description.replace(/(#[\d\w]{1,})(?=\s|$)/g, match => {
-        return `<button class="open-tag" forsearch="${match}">${match}</button>`
+        return `<button class="open-tag" data-tag="${match}">${match}</button>`
+    }).replace(/https:\/\/(.+?)(?= |$)/gm, match => {
+        return `<button class="open-link" data-link="${match}">${match}</button>`
     })
 }
 
 
-function setActionForTags (nodeDescr) {
+function setActionForBtnsInDescription (nodeDescr) {
     nodeDescr.querySelectorAll(".open-tag").forEach(btn => {
         btn.onclick = event => {
-            filterInput.value = event.currentTarget.getAttribute("forsearch");
+            setPreset("tag");
+            filterInput.value = event.currentTarget.dataset.tag;
             filtration();
+        }
+    })
+
+    nodeDescr.querySelectorAll(".open-link").forEach(btn => {
+        btn.onclick = event => {
+            chrome.tabs.create({ 
+                url: event.currentTarget.dataset.link, 
+                active: false 
+            });
         }
     })
 }
