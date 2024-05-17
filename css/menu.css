@@ -35,7 +35,7 @@ menu > .group-links > button {
     color: var(--color-content);
 
     display: grid;
-    grid-template-columns: 85% 15%;
+    grid-template-columns: 8% 77% 15%;
     align-items: center;
     padding: 5px 10px;
     font-size: 14px;
@@ -60,6 +60,11 @@ menu > .group-links > button {
 
 menu > .group-links > button.disabled {
     display: none;
+}
+
+menu > .group-links > button > svg {
+    height: 8px;
+    width: 8px;
 }
 
 menu > .group-links > button > .title {

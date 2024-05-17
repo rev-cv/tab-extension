@@ -52,7 +52,8 @@ body {
 #popup-import.disabled,
 #popup-donate.disabled,
 #popup-export.disabled {
-    transform: scale(0) translate(-500px, 500px);
+    /* transform: scale(0) translate(-500px, 500px); */
+    transform: scale(0);
 }
 
 #curtain > div > .title {
@@ -72,6 +73,40 @@ body {
     &:last-child {
         margin-right: 0;
     }
+}
+
+#popup-tags {
+    width: 50%;
+    max-width: 400px;
+    height: 90%;
+    background-color: var(--color-widget);
+    border-radius: 10px;
+    cursor: default;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+    position: absolute;
+    transform: scale(1) ;
+    transition: transform 300ms;
+    transform-origin: top right;
+
+    padding: 20px;
+
+    /* display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 30px 1fr 30px;
+    grid-row-gap: 10px; */
+
+    display: flex;
+    flex-direction: column;
+}
+
+#popup-tags.disabled {
+    transform: scale(0);
+}
+
+#popup-tags > .informing {
+    font-size: 14px;
+    color: var(--color-content-80);
+    padding: 20px 0;
 }
 
 #curtain > div > textarea {
@@ -120,7 +155,8 @@ body {
     margin: 0 5px;
 }
 
-#curtain > div button {
+#popup-import > button,
+#popup-export > .btns > button {
     grid-column: 1 / -1;
     justify-self: end;
     background-color: var(--color-accent);
@@ -147,4 +183,77 @@ body {
     &:hover:after {
         opacity: .1;
     }
+}
+
+
+#list-all-tags {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-y: auto;
+}
+
+#list-all-tags > .tag-name {
+    background-color: var(--color-widget);
+    color: var(--color-accent);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 5px;
+    margin-top: 10px;
+    display: flex;
+
+
+    &:hover:after {
+        opacity: 0;
+    }
+}
+
+#list-all-tags > .tag-name > span:first-child {
+    flex-grow: 1;
+    text-align: left;
+}
+
+#list-all-tags > .tag-name > span:last-child {
+    color: var(--color-content);
+    opacity: .7;
+    font-size: 14px;
+}
+
+#list-all-tags > .tag-desc {
+    background-color: transparent;
+    color: var(--color-content-80);
+    font-size: 12px;
+    resize: none;
+    overflow: hidden;
+    padding-left: 5px;
+
+
+    &::selection {
+        background-color: var(--color-accent);
+        color: var(--color-widget);
+    }
+}
+
+#list-all-tags::-webkit-scrollbar,
+#list-all-tags > .tag-desc::-webkit-scrollbar {
+	width: 4px;
+}
+
+#list-all-tags::-webkit-scrollbar-track,
+#list-all-tags > .tag-desc::-webkit-scrollbar-track {
+	background-color: transparent;
+    border-radius: 2px;
+}
+
+#list-all-tags::-webkit-scrollbar-thumb,
+#list-all-tags > .tag-desc::-webkit-scrollbar-thumb {
+	background-color: var(--color-content-30);
+    border-radius: 2px;
+}
+
+#list-all-tags::-webkit-scrollbar-corner,
+#list-all-tags > .tag-desc::-webkit-scrollbar-corner {
+    background-color: transparent;
 }

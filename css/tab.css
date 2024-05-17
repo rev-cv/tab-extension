@@ -181,6 +181,14 @@
     background-color: transparent;
 }
 
+.tab > .edit-description > span {
+    align-self: center;
+    font-size: 12px;
+    color: var(--color-red);
+    padding-left: 20px;
+    opacity: .8;
+    user-select: none;
+}
 
 .tab > .sw > button,
 .tab > button {

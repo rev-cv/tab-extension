@@ -13,6 +13,12 @@
 const nodeMenu = document.querySelector("menu > .group-links")
 const nodeGroups = document.querySelector("main > .groups")
 let dataDescriptionForCurrentTabs = [];
+async function clearDataDescr(arrTabID){
+    arrTabID.forEach( tabID => {
+        let dID = dataDescriptionForCurrentTabs.findIndex( d => d.id === tabID)
+        if (dID >= 0) delete dataDescriptionForCurrentTabs[dID]
+    })
+}
 
 
 function setGroup (objGroup, isAfterCurrent=false) {
@@ -67,13 +73,13 @@ function setGroup (objGroup, isAfterCurrent=false) {
         inputTittle.className = "edit-title";
         inputTittle.type = "text";
         inputTittle.value = nameGroup;
-        inputTittle.addEventListener('change', event => {
+        inputTittle.onchange = event => {
             if (inputTittle.value.length === 0) {
                 inputTittle.value = objGroup.date;
             }
             renameGroup(objGroup.id, inputTittle.value);
             pointMenuTitle.innerText = inputTittle.value;
-        });
+        };
         panel.append(inputTittle);
 
         let viewDate = document.createElement('div');
@@ -249,6 +255,12 @@ function setGroup (objGroup, isAfterCurrent=false) {
             scrollToElement(group)
     }
 
+    pointMenu.insertAdjacentHTML( 'afterbegin', isCurrent ?
+        '<svg class="icon"><use xlink:href="#ico-point-current"/></svg>'
+        :
+        '<svg class="icon"><use xlink:href="#ico-point-group"/></svg>'
+    );
+
     let pointMenuTitle = document.createElement('div');
     pointMenuTitle.className = "title";
     pointMenuTitle.innerHTML = nameGroup;
@@ -279,11 +291,8 @@ function setTab (group, objTab, isCurrent, previousNode) {
     tab.setAttribute("data-to-url", objTab.url.toLowerCase());
     tab.setAttribute("data-domain", objTab.domain);
 
-    if (isCurrent) tab.setAttribute("data-description", "")
-
     let sw = document.createElement('div');
     sw.className = "sw";
-    tab.append(sw);
 
     let btnDelete = document.createElement('button');
     btnDelete.className = "btn-delete";
@@ -298,7 +307,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
                 deleteTab(objTab.id, objTab.date);
             }
     }
-    sw.append(btnDelete);
 
     let btnSelect = document.createElement('button');
     btnSelect.className = "btn-select";
@@ -332,7 +340,8 @@ function setTab (group, objTab, isCurrent, previousNode) {
                 btnAllSelect.classList.remove("active")
             }
     }
-    sw.append(btnSelect);
+
+    sw.append(btnDelete, btnSelect);
 
     let btnDomain = document.createElement('button');
     btnDomain.className = "btn-ico-domain";
@@ -348,7 +357,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
         filterInput.value = objTab.domain;
         filtration();
     }
-    tab.append(btnDomain);
 
     let btnTitle = document.createElement('button');
     btnTitle.className = "btn-title";
@@ -366,7 +374,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
             // updateCurrentSession()
         }
     })
-    tab.append(btnTitle);
 
     let btnDescription = document.createElement('button');
     btnDescription.className = "btn-descr";
@@ -382,7 +389,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
                 setInputDescription(objTab, tab, description, isCurrent)
             }
     }
-    tab.append(btnDescription);
 
     let btnDuplicates = document.createElement('button');
     btnDuplicates.className = "btn-dup";
@@ -393,13 +399,31 @@ function setTab (group, objTab, isCurrent, previousNode) {
         filterInput.value = objTab.url;
         filtration();
     }
-    tab.append(btnDuplicates);
 
     let description = document.createElement('div');
     description.className = 0 < objTab.description.length ? "description" : "description hide";
     description.innerHTML = extractTagsAndLinks(encodeHTML(objTab.description)).replaceAll("\n", "<br>");
     setActionForBtnsInDescription(description)
-    tab.append(description);
+
+    tab.append(
+        sw,
+        btnDomain,
+        btnTitle,
+        btnDescription,
+        btnDuplicates,
+        description
+    );
+
+    // отоборажение формы редактирования, если та не была закрыта ранее
+    if (isCurrent) {
+        let descr = dataDescriptionForCurrentTabs.find( d => d.id === objTab.id);
+        if (descr != undefined) {
+            if (descr.isEdited){
+                description.className = "description hide";
+                setInputDescription(objTab, tab, description, isCurrent)
+            }
+        }
+    }
 
     if (previousNode) previousNode.after(tab)
     else group.append(tab)
@@ -414,13 +438,43 @@ function setInputDescription(objTab, nodeTab, nodeDescr, isCurrent){
     const closeThisWidget = event => {
         nodeDescr.className = objTab.description.length != 0 ? 
             "description" : "description hide";
+        if (isCurrent){
+            let dID = dataDescriptionForCurrentTabs.findIndex( d => d.id === objTab.id)
+            if (dID >= 0){
+                dataDescriptionForCurrentTabs[dID].isEdited = false;
+            }
+        }
         form.remove()
     }
 
     let textarea = document.createElement('textarea');
     textarea.textContent = objTab.description;
     textarea.rows = 7;
+    textarea.addEventListener("input", e => {
+        const text = textarea.value.trim();
+        if (isCurrent){
+            let descr = dataDescriptionForCurrentTabs.find( d => d.id === objTab.id)
+
+            if (descr != undefined ){
+                descr.temp = text;
+                descr.isEdited = true;
+            } else {
+                dataDescriptionForCurrentTabs.push({
+                    id: objTab.id,
+                    temp: text,
+                    isEdited: true,
+                })
+            }
+        }
+
+    }) 
     form.append(textarea);
+
+    if (isCurrent){
+        let warning = document.createElement('span');
+        warning.innerText = "Descriptions of open tabs are stored temporarily until the page is reloaded!"
+        form.append(warning);
+    }
 
     let form__ok = document.createElement('button');
     form__ok.innerText = "ok";
@@ -431,23 +485,33 @@ function setInputDescription(objTab, nodeTab, nodeDescr, isCurrent){
         objTab.description = text;
 
         if (isCurrent){
-            dataDescriptionForCurrentTabs.push({
-                id: objTab.id,
-                description: text
-            })
+            let descr = dataDescriptionForCurrentTabs.find( d => d.id === objTab.id)
+
+            if (descr != undefined ){
+                descr.description = text;
+                descr.isEdited = false;
+            } else {
+                dataDescriptionForCurrentTabs.push({
+                    id: objTab.id,
+                    description: text,
+                    isEdited: false,
+                })
+            }
         } else {
             updateDescription(objTab.id, text);
         }
         closeThisWidget();
     }
-    form.append(form__ok);
 
     let form__cancel = document.createElement('button');
     form__cancel.innerText = "cancel";
     form__cancel.onclick = closeThisWidget;
-    form.append(form__cancel);
     
-    nodeTab.append(form)
+    form.append(form__ok, form__cancel)
+    nodeTab.append(form);
+
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
 }
 
 

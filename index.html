@@ -66,9 +66,9 @@
                 <button id="back-filtration">
                     <svg class="icon"><use xlink:href="#ico-back"/></svg>
                 </button>
-                <input type="text" id="text-input" placeholder="filter">
-                <button id="start-filtration">
-                    <svg class="icon"><use xlink:href="#ico-filter"/></svg>
+                <input type="text" id="text-input" placeholder="filter, filter, filter">
+                <button id="open-all-tags">
+                    <svg class="icon"><use xlink:href="#ico-tags"/></svg>
                 </button>
 
                 <div class="presets">
@@ -97,17 +97,28 @@
         </div>
 
         <div id="popup-donate" class="disabled">
-            <div class="title">Donate</div>
+            <div class="title">A cup of tea for the programmer.</div>
         </div>
 
         <div id="popup-export" class="disabled">
-            <div class="title">Import</div>
+            <div class="title">Import from OneTab or TabEx</div>
             <textarea rows="10"></textarea>
             <div class="btns">
                 <button id="btn-generate-onetab">OneTab format</button>
                 <button  id="btn-generate-tabex">TabEx format</button>
             </div>
-            
+        </div>
+
+        <div id="popup-tags" class="disabled">
+            <div class="title">All used tags</div>
+            <div class="informing">
+                Add tags (<code>#tag</code>) to the description of tabs.
+                <br>
+                All added tags will be displayed here.
+            </div>
+            <div id="list-all-tags">
+                <!-- TAGS -->
+            </div>
         </div>
     </div>
 </body>

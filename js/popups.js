@@ -4,9 +4,10 @@ curtain.addEventListener("mousedown", closePopUp)
 const importPopUp = curtain.querySelector("#popup-import");
 const donatePopUp = curtain.querySelector("#popup-donate");
 const exportPopUp = curtain.querySelector("#popup-export");
+const tagsPopUp = curtain.querySelector("#popup-tags");
 
 
-[importPopUp, donatePopUp, exportPopUp].forEach( node => {
+[importPopUp, donatePopUp, exportPopUp, tagsPopUp].forEach( node => {
     node.onclick = event => event.stopPropagation();
 })
 
@@ -21,13 +22,16 @@ document.querySelector("#btn-generate-tabex").onclick = exportInTabEx;
 
 function closePopUp (event) {
 
-    if (event.target.id === "curtain" || event === undefined) {
+    if (event === undefined) close()
+    else if (event.target.id === "curtain") close()
+
+    function close(){
         curtain.style.opacity = 0;
         setTimeout(() => {
             curtain.style.display = "none";
         }, 300);
 
-        [importPopUp, donatePopUp, exportPopUp].forEach( node => {
+        [importPopUp, donatePopUp, exportPopUp, tagsPopUp].forEach( node => {
             node.classList.add("disabled")
         })
     }
@@ -41,6 +45,11 @@ function openPopUp (window) {
         curtain.style.opacity = 1;
 
         switch (window) {
+            case "tags": {
+                tagsPopUp.classList.remove("disabled");
+                fillPopUpTags();
+                break;
+            }
             case "inport": {
                 importPopUp.classList.remove("disabled"); break;
             }
@@ -84,6 +93,8 @@ async function importData(){
         })
 
         closePopUp()
+
+        if (filteringModeEnabled) backFiltration()
     }
 }
 
@@ -238,3 +249,45 @@ async function importFromTabEx (strings) {
 }
 
 
+const listAllTags = document.querySelector("#list-all-tags");
+
+async function fillPopUpTags() {
+
+    listAllTags.querySelectorAll(".tag-name, .tag-desc").forEach( node => node.remove() )
+
+    const allTags = await getAllTags();
+
+    allTags.forEach( tag => {
+
+        let tagBtn = document.createElement('button');
+        let tabTxt = document.createElement('textarea');
+
+        tagBtn.classList.add("tag-name");
+        tabTxt.classList.add("tag-desc");
+
+        tagBtn.innerHTML = `<span>${tag.name}</span> <span>${tag.count}</span>`;
+        tabTxt.textContent = tag.description;
+        tabTxt.placeholder = "description";
+        tabTxt.rows = 1;
+        
+        tagBtn.onclick = event => {
+            setPreset("tag");
+            filterInput.value = tag.name;
+            filtration();
+            closePopUp();
+        }
+
+        tabTxt.oninput = event => {
+            tabTxt.style.minHeight = tabTxt.scrollHeight + 'px';
+        }
+
+        tabTxt.onchange = event => {
+            updateTagDescription(tag.id, tabTxt.value.trim() )
+        }
+
+        listAllTags.append(tagBtn, tabTxt);
+
+        tabTxt.style.minHeight = tabTxt.scrollHeight + 'px';
+
+    })
+}

@@ -2,6 +2,7 @@
 var db = new Dexie("tab-ex-database");
 db.version(1).stores({
     tabs: `++id, title, url, icon, date, domain, description`,
+    tags: `++id, name, description`,
     sessions: `++id, name, date`,
 });
 
@@ -12,7 +13,10 @@ async function saveCurrentSession () {
     const tabs = await chrome.tabs.query({ currentWindow: true });
     let tabsForWrite = getCurrentTabs(tabs, date);
 
+    
+
     if (0 < tabsForWrite.length) {
+
         // сохранить информацию о сессии
         const sessID = await db.sessions.bulkPut([{name: date, date: date}]);
 
@@ -37,7 +41,12 @@ async function saveCurrentSession () {
         document.querySelectorAll("#group-current > .tab").forEach(old_tab => {
             old_tab.remove()
         })
+
+        // очистить временное описание для не сохраненных вкладок
+        clearDataDescr(tabs.map( item => item.id ));
     }
+
+    if (filteringModeEnabled) filtration()
 }
 
 
@@ -76,7 +85,12 @@ async function saveSelectedTabs () {
             }, true);
 
         }
+
+        // очистить временное описание для не сохраненных вкладок
+        clearDataDescr(tabID);
     }
+
+    if (filteringModeEnabled) filtration()
 }
 
 
@@ -206,7 +220,6 @@ async function saveImportData (groups) {
     }
 
     return groupFromDB;
-
 }
 
 async function findIcon (domain) {
@@ -232,7 +245,6 @@ async function detectiveIcons (domain, icon) {
             <img src="${icon}" />
         `
     })
-
 }
 
 
@@ -344,4 +356,71 @@ async function filteringByCondition (preset, conditions) {
         sess.map(item => `#group-${item}`).join(", "),
         sess.map(item => `#point-for-${item}`).join(", "),
     ]
+}
+
+
+async function tagManagment (tagInTab) {
+    // удаляет больше не присутствующие теги
+    // добавляет вновь добавленные теги
+}
+
+async function getAllTags(){
+
+    const regex = /(\#.*?)(?=\s|$)/gm;
+    let result = [];
+
+    const tabs = await db.tabs.filter( tab => tab.description.includes("#")).toArray();
+    const tags = await db.tags.toArray();
+
+    // const tagTagNames = tags.map( t => t.name);
+
+    // подсчитывание количества тегов
+    let counter = {};
+    tabs.forEach( tab => {
+        tab.description.match(regex).forEach(t => {
+            counter[t] = counter[t] === undefined ? 1 : counter[t] + 1;
+        })
+    })
+
+    // вывод тегов уже находящихся в базе
+    const allTagInTabs = Object.keys(counter);
+    let allTagInDB = [];
+    await tags.forEach( t => {
+        if (allTagInTabs.includes(t.name)) {
+            result.push({
+                id: t.id,
+                name: t.name,
+                description: t.description,
+                count: counter[t.name],
+            })
+            allTagInDB.push(t.name)
+        } else {
+            // удалить элемент
+            db.tags.delete(t.id)
+        }
+    });
+
+    // вывод тегов НЕ находящихся в базе
+    for (let i = 0; i < allTagInTabs.length; i++) {
+        const t = allTagInTabs[i];
+        if (!allTagInDB.includes(t)) {
+            // добавить тег в базу
+            const tagID = await db.tags.bulkPut([{name: t, description: ""}]);
+            result.push({
+                id: tagID,
+                name: t,
+                description: "",
+                count: counter[t],
+            })
+        }
+    }
+
+    return result.sort( (a, b) => a.name.localeCompare(b.name) )
+}
+
+
+function updateTagDescription (id, description) {
+
+    db.tags.update(id, { description });
+
 }

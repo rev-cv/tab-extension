@@ -1,7 +1,6 @@
 
 const filterInput = document.querySelector("#text-input");
 const backFilter = document.querySelector("#back-filtration");
-document.querySelector("#start-filtration").onclick = filtration;
 backFilter.onclick = backFiltration;
 backFilter.style.visibility = "hidden";
 filterInput.addEventListener('keydown', event => {
@@ -10,6 +9,8 @@ filterInput.addEventListener('keydown', event => {
 window.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') backFiltration()
 });
+
+document.querySelector("#open-all-tags").onclick = e => openPopUp("tags");
 
 
 function sortTabs (group, list) {
@@ -150,6 +151,8 @@ async function backFiltration (event) {
     nodeGroups.querySelectorAll(".g.is-select-mode").forEach( node => {
         node.classList.remove("is-select-mode")
     })
+
+    setPreset("td")
 }
 
 

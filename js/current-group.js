@@ -28,7 +28,7 @@ function getCurrentTabs(tabs, date){
                 const isTabEx = domain[1] === "chrome-extension" && tab.title === "TabEx";
 
                 // достать описание, если оно было задано для текущей вкладки
-                const descr = dataDescriptionForCurrentTabs.filter( e => e.id === tab.id);
+                const descr = dataDescriptionForCurrentTabs.find( e => e.id === tab.id);
 
                 if (!isTabEx) {
                     currentTabs.push({
@@ -38,7 +38,7 @@ function getCurrentTabs(tabs, date){
                         icon: tab.favIconUrl,
                         date,
                         domain: domain[1],
-                        description: descr.length === 1 ? descr[0].description : "",
+                        description: descr === undefined ? "" : descr.description,
                     })
                 }
             } else {
