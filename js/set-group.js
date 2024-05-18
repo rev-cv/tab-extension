@@ -32,7 +32,9 @@ function setGroup (objGroup, isAfterCurrent=false) {
     group.className = "g";
 
 
-    // PANEL
+    // GROUP PANEL
+
+
     let panel = document.createElement('div');
     panel.className = "control-panel";
     group.append(panel);
@@ -125,7 +127,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
     panel.append(count);
 
 
-    // SUB PANEL
+    // GROUP SUB PANEL
 
     
     let subPanel = document.createElement('div');
@@ -191,6 +193,34 @@ function setGroup (objGroup, isAfterCurrent=false) {
         subPanel.append(btnSaveAndClose);
     }
 
+    let btnSaveInGroup = document.createElement('button');
+    btnSaveInGroup.className = "select-save-in-group";
+    btnSaveInGroup.innerHTML = `
+        <svg class="icon"><use xlink:href="#ico-move-to"/></svg>
+        <span>${isCurrent ? "save in group" : "move to group"}</span>
+    `;
+    btnSaveInGroup.onclick = event => {
+        
+            openPopUp("groups", groupObj => {
+
+                if (isCurrent) {
+                    saveSelectedTabsByGroup(groupObj);
+                } else {
+
+                    // получить выбранные вкладки
+                    const nodetabs = group.querySelectorAll(".tab.selected");
+                    const tabID = [...nodetabs].map( node => {
+                        return Number(node.id.replace("tab-", ""))
+                    });
+                    
+                    moveToGroup(groupObj, tabID);
+                }
+
+                closePopUp();
+            })
+    }
+    subPanel.append(btnSaveInGroup);
+
     let btnOpenNew = document.createElement('button');
     btnOpenNew.className = "select-open-new";
     btnOpenNew.innerHTML = `
@@ -229,13 +259,15 @@ function setGroup (objGroup, isAfterCurrent=false) {
             } else {
                 deleteSelectedTabs(group)
             }
-
     }
     subPanel.append(btnDelete);
 
 
     group.append(subPanel);
     
+
+    // GROUP TABS
+
 
     if (0 < objGroup.tabs.length){
         objGroup.tabs.forEach( tab => setTab(group, tab, isCurrent) );
@@ -248,6 +280,7 @@ function setGroup (objGroup, isAfterCurrent=false) {
     
 
     // LINK ON GROUP
+
 
     let pointMenu = document.createElement('button');
     pointMenu.id = `point-for-${objGroup.id}`;

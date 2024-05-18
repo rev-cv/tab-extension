@@ -8,12 +8,12 @@ db.version(1).stores({
 
 
 async function saveCurrentSession () {
+    // сохраняет все открытые вкладки в новую группу
 
     const date = getCurrentDate();
     const tabs = await chrome.tabs.query({ currentWindow: true });
     let tabsForWrite = getCurrentTabs(tabs, date);
 
-    
 
     if (0 < tabsForWrite.length) {
 
@@ -51,6 +51,7 @@ async function saveCurrentSession () {
 
 
 async function saveSelectedTabs () {
+    // сохраняет выбранные открытые вкладки в новую группу
 
     const current = document.querySelector("#group-current");
 
@@ -91,6 +92,109 @@ async function saveSelectedTabs () {
     }
 
     if (filteringModeEnabled) filtration()
+}
+
+async function saveSelectedTabsByGroup (group) {
+    // сохраняет открытую вкладку в ранее созданную группу
+
+    const current = document.querySelector("#group-current");
+
+    const tabID = [...current.querySelectorAll(".tab.selected")]
+        .map( node => Number(node.id.replace("tab-", "")) )
+
+    if (tabID.length != 0) {
+        let tabs = await chrome.tabs.query({ currentWindow: true })
+        tabs = tabs.filter( tab => tabID.includes(tab.id) );
+
+        if (tabs.length != 0) {
+
+            // сохранить вкладки в базу
+            await db.tabs.bulkPut(
+                getCurrentTabs(tabs, group.date)
+            );
+
+            // найти node группы и счетчики
+            const nodeGroup = nodeGroups.querySelector(`#group-${group.id}`);
+            const counter1 = nodeGroup.querySelector(`.control-panel > .count`);
+            const counter2 = nodeMenu.querySelector(`#point-for-${group.id} > .count`);
+
+            // получить новый список вкладок для группы
+            const newTabs = await db.tabs.where('date').equals(group.date).toArray();
+
+            // получить список отрисованных в группе вкладок
+            let ids = [];
+            nodeGroup.querySelectorAll(".tab").forEach( node => {
+                ids.push(Number(node.id.replace("tab-", "")))
+            });
+
+            // отрисовать вкладки отсутствующие в группе
+            newTabs.forEach( tabObj => {
+                if (!ids.includes(tabObj.id))
+                    setTab(nodeGroup, tabObj)
+            })
+
+            counter1.innerText = newTabs.length;
+            counter2.innerText = newTabs.length;
+
+        }
+    }
+}
+
+
+async function moveToGroup (groupObj, listTabID) {
+    // перемещает выбранные вкладки из одной группы в другую
+
+    const tabObjs = await db.tabs.filter( tab => listTabID.includes(tab.id) ).toArray();
+
+    if (tabObjs.length > 0) {
+
+        // получить группу теряющую вкладки
+        const loseGroup = await db.sessions.where('date').equals(tabObjs[0].date).first();
+        const loseGroupDate = tabObjs[0].date;
+
+        // найти node группы и счетчики
+        const nodeGroup = nodeGroups.querySelector(`#group-${groupObj.id}`);
+        const counter1 = nodeGroup.querySelector(`.control-panel > .count`);
+        const counter2 = nodeMenu.querySelector(`#point-for-${groupObj.id} > .count`);
+
+        const loseNodeGroup = nodeGroups.querySelector(`#group-${loseGroup.id}`);
+        const loseCounter1 = loseNodeGroup.querySelector(`.control-panel > .count`);
+        const loseCounter2 = nodeMenu.querySelector(`#point-for-${loseGroup.id} > .count`);
+
+        // записать изменения в базу
+        for (let i = 0; i < tabObjs.length; i++) {
+            await db.tabs.update(tabObjs[i].id, { date: groupObj.date });
+        }
+
+        // очистить старую группу от перемещенных вкладок
+        loseNodeGroup.querySelectorAll(".tab").forEach( node => {
+            if (listTabID.includes(Number(node.id.replace("tab-", ""))))
+                node.remove()
+        });
+
+        // получить из базы новый список вкладок для nodeGroup
+        const newTabs = await db.tabs.where('date').equals(groupObj.date).toArray();
+
+        // отрисовать вкладки отсутствующие в nodeGroup
+        newTabs.forEach( tabObj => {
+            if (listTabID.includes(tabObj.id))
+                setTab(nodeGroup, tabObj)
+        })
+
+        counter1.innerText = newTabs.length;
+        counter2.innerText = newTabs.length;
+
+        // получить количество оставшихся вкладок у loseNodeGroup
+        const lostTabsCount = await db.tabs.where('date').equals(loseGroup.date).count();
+        if (lostTabsCount === 0) {
+            db.sessions.delete(loseGroup.id);
+            loseNodeGroup.remove();
+            document.querySelector(`#point-for-${loseGroup.id}`).remove();
+        } else {
+            loseCounter1.innerText = lostTabsCount;
+            loseCounter2.innerText = lostTabsCount;
+        }
+    }
 }
 
 
@@ -422,5 +526,12 @@ async function getAllTags(){
 function updateTagDescription (id, description) {
 
     db.tags.update(id, { description });
+
+}
+
+
+async function getAllGroups() {
+    
+    return await db.sessions.toArray();
 
 }

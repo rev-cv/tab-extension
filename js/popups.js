@@ -5,9 +5,12 @@ const importPopUp = curtain.querySelector("#popup-import");
 const donatePopUp = curtain.querySelector("#popup-donate");
 const exportPopUp = curtain.querySelector("#popup-export");
 const tagsPopUp = curtain.querySelector("#popup-tags");
+const groupsPopUp = curtain.querySelector("#popup-select-group");
 
 
-[importPopUp, donatePopUp, exportPopUp, tagsPopUp].forEach( node => {
+const allPopUps = [importPopUp, donatePopUp, exportPopUp, tagsPopUp, groupsPopUp];
+
+allPopUps.forEach( node => {
     node.onclick = event => event.stopPropagation();
 })
 
@@ -31,14 +34,12 @@ function closePopUp (event) {
             curtain.style.display = "none";
         }, 300);
 
-        [importPopUp, donatePopUp, exportPopUp, tagsPopUp].forEach( node => {
-            node.classList.add("disabled")
-        })
+        allPopUps.forEach( node => { node.classList.add("disabled") })
     }
 }
 
 
-function openPopUp (window) {
+function openPopUp (window, callback) {
 
     curtain.style.display = "flex";
     setTimeout(() => {
@@ -48,6 +49,11 @@ function openPopUp (window) {
             case "tags": {
                 tagsPopUp.classList.remove("disabled");
                 fillPopUpTags();
+                break;
+            }
+            case "groups": {
+                groupsPopUp.classList.remove("disabled");
+                fillPopUpGroups(callback);
                 break;
             }
             case "inport": {
@@ -289,5 +295,24 @@ async function fillPopUpTags() {
 
         tabTxt.style.minHeight = tabTxt.scrollHeight + 'px';
 
+    })
+}
+
+
+const listAllGroups = document.querySelector("#list-all-groups");
+
+async function fillPopUpGroups (callback) {
+
+    listAllGroups.querySelectorAll("button").forEach( node => node.remove() )
+
+    const groups = await getAllGroups();
+    groups.forEach( group => {
+        let btnGroup = document.createElement('button');
+        btnGroup.innerHTML = `
+            <svg class="icon"><use xlink:href="#ico-point-group"/></svg>
+            <span>${group.name}</span>
+        `;
+        btnGroup.onclick = event => callback(group)
+        listAllGroups.append(btnGroup)
     })
 }

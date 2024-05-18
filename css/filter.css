@@ -88,3 +88,9 @@ main > .filter-panel > .presets > button.active {
     background-color: var(--color-accent);
     color: var(--color-canvas);
 }
+
+main > .filter-panel > .presets > span {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-accent);
+}
