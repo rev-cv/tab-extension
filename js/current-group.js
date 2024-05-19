@@ -1,4 +1,6 @@
 
+let currentTabs = [];
+
 
 function getDomain (url) {
     let domain = /^(?:https?|ftp?|chrome?):\/\/([^\/]+)/.exec(url);
@@ -13,10 +15,11 @@ function getDomain (url) {
     return domain === null ? ["", "undefined"] : domain
 }
 
-function getCurrentTabs(tabs, date){
-    // преобразование текущих открытых вкладок в объект для расширения
 
-    let currentTabs = [];
+function getCurrentTabs(tabs, date){
+    // преобразование текущих открытых вкладок в объекты
+
+    let currentTabs = []; // очистка глобальной переменной хранящий текущие вкладки
 
     tabs.forEach( tab => {
         if (!tab.pinned) {
@@ -42,9 +45,9 @@ function getCurrentTabs(tabs, date){
                     })
                 }
             } else {
-                console.log("--------------")
-                console.log(tab)
-                console.log(domain)
+                console.log("TAB NOT ADDED")
+                console.log(`   URL: ${tab}`)
+                console.log(`DOMAIN: ${domain}`)
             }
         }
     });
@@ -72,122 +75,105 @@ async function addCurrentSession () {
 
     const tabs = await chrome.tabs.query({ currentWindow: true });
 
+    currentTabs = getCurrentTabs(tabs, date);
+
     setGroup({
         id: "current",
         name: "Current",
         date,
-        tabs: getCurrentTabs(tabs, date)
+        tabs: currentTabs
     })
 
 }
 addCurrentSession()
 
 
-async function updateCurrentSession__FULL () {
-    // перерисовывает группу Current
+async function updateCurrentSession__V4 () {
 
-    const current = document.querySelector("#group-current");
-    const counter1 = document.querySelector("#point-for-current > .count");
-    const counter2 = current.querySelector(`.control-panel > .count`);
+    /*
+        V3
+        Подобная сложная схема управлению ссылками на открытые вкладки 
+        необходима для того, чтобы избежать лишних пересозданий ссылок
+        и сгладить дерганье интерфейса появляющее при перерисовке.
 
-    current.querySelectorAll(".tab").forEach( elem => elem.remove());
-
-    const tabs = getCurrentTabs(
-        await chrome.tabs.query({ currentWindow: true }), 
-        getCurrentDate()
-    );
-
-    counter1.innerText = tabs.length;
-    counter2.innerText = tabs.length;
-    tabs.forEach( tab => setTab(current, tab, true))
-
-    if (filteringModeEnabled) filtrationCurrent(presetfilter, appliedFilters)
-}
-
-
-async function updateCurrentSession (IDTabUploaded) {
-
-    // перерисовывает группу Current
+        V4
+        Универсальная схема обновления текущих вкладок.
+    */
 
     const currentGroup = document.querySelector("#group-current");
     const counter1 = document.querySelector("#point-for-current > .count");
     const counter2 = currentGroup.querySelector(`.control-panel > .count`);
-    const current = currentGroup.querySelectorAll(".tab");
-
-    /*
-        Подобная сложная схема управлению ссылками на открытые вкладки 
-        необходима для того, чтобы избежать лишних пересозданий ссылок
-        и сгладить дерганье интерфейса появляющее при перерисовке.
-    */
-
-    // получение открытых окон
-    const modified = getCurrentTabs(
+    
+    const browserTabs = getCurrentTabs(
         await chrome.tabs.query({ currentWindow: true }), 
         getCurrentDate()
     );
+    counter1.innerText = browserTabs.length;
+    counter2.innerText = browserTabs.length;
 
-    const modifiedID = modified.map( tab => tab.id );
-    const currentID = [];
 
-    // удаление ссылок на закрытые вкладки
-    current.forEach( elem => {
-        const elemID = Number(elem.id.replace("tab-", ""));
-        if (!modifiedID.includes(elemID)){
-            elem.remove();
+    // поиск добавленных и измененных вкладок
+    browserTabs.forEach( tab => {
+
+        const oldTab = currentTabs.find( elem => elem.id === tab.id);
+
+        // в старой версии нет вкладки? 
+        if (oldTab === undefined) {
+            // добавить новую вкладку
+            setTab(currentGroup, tab, true)
+
         } else {
-            currentID.push(elemID)
+
+            // сравнить различия между старой и обновленной вкладкой
+
+            if (tab.title != oldTab.title) {
+                currentGroup.querySelector(
+                    `#tab-${tab.id} > .btn-title`
+                ).innerText = tab.title;
+            }
+
+            if (tab.icon != oldTab.icon)  {
+                const img = currentGroup.querySelector(
+                    `#tab-${tab.id} > .btn-ico-domain > img`
+                )
+
+                if (img === null) {
+                    currentGroup.querySelector(
+                        `#tab-${tab.id} > .btn-ico-domain`
+                    ).innerHTML = `<img src="${tab.icon}" />`
+                } else {
+                    img.src = tab.icon;
+                }
+            }
         }
     })
 
-    let isMoveTo = false;
 
-    // добавление открытых вкладок
-    for (let i = 0; i < modified.length; i++) {
-        const elem = modified[i];
+    // поиск удаленных вкладок и удаление их из DOM
+    let tabIDForDelete = [];
+    const browserTabsID = browserTabs.map( elem => elem.id);
+    currentTabs.forEach( (tab, index) => {
+        if (!browserTabsID.includes(tab.id))
+            tabIDForDelete.push(`#tab-${tab.id}`)
+    })
 
-        if (elem.id === currentID[i]){
-            // все находится на своих местах
-
-            if (elem.id === IDTabUploaded){
-                // обновление данных загруженной вкладки
-                const imgSel = `#tab-${modified[i-1].id} > .btn-ico-domain > img`;
-                const img = currentGroup.querySelector(imgSel);
-                img.src = elem.favIconUrl != undefined ? elem.favIconUrl : "";
-
-                const titleSel = `#tab-${modified[i-1].id} > .btn-title`;
-                const title = currentGroup.querySelector(titleSel);
-                title.innerText = elem.title;
-            }
-
-            continue
-        }
-        
-        if (!currentID.includes(elem.id)) {
-            // в currentGroup нет ссылки на вкладку
-            // добавляется новая ссылка на вкладку
-            const setAfterNode = i === 0 ?
-                currentGroup.querySelector(`.sub-control-panel`)
-                :
-                currentGroup.querySelector(`#tab-${modified[i-1].id}`)
-
-            setTab(currentGroup, elem, true, setAfterNode)
-        } else {
-            // требуется сортировка вкладок
-            if (!isMoveTo) isMoveTo = true;
-        }
+    if (0 < tabIDForDelete.length){
+        currentGroup.querySelectorAll(tabIDForDelete.join(", ")).forEach( node => 
+            node.remove()
+        )
     }
 
-    if (isMoveTo)
-        sortTabs(currentGroup, modifiedID)
 
-    counter1.innerText = modified.length;
-    counter2.innerText = modified.length;
+    currentTabs = [...browserTabs];
 
-    if (modified.length === 0) {
-        currentGroup.classList.remove("is-select-mode");
-    }
 
+    // сортировка вкладок в DOM
+    sortTabs (currentGroup, browserTabsID)
+    
+
+    // применение фильтрации, если она включена
     if (filteringModeEnabled) filtrationCurrent(presetfilter, appliedFilters)
+
 }
 
 
@@ -277,28 +263,18 @@ async function filtrationCurrent (preset, conditions) {
 }
 
 // обновление текущих вкладок при переходе на вкладку расширения
-document.addEventListener('visibilitychange', updateCurrentSession__FULL);
+document.addEventListener('visibilitychange', updateCurrentSession__V4);
 
 // обновление текущих вкладок при закрытии какой-то вкладки
-chrome.tabs.onRemoved.addListener(updateCurrentSession);
+chrome.tabs.onRemoved.addListener(updateCurrentSession__V4);
 
 // обновление текущих вкладок при открытии какой-то вкладки
-// chrome.tabs.onCreated.addListener(tab => {
-//     const tabId = tab.id;
-//     const onTabUpdated = (updatedTabId, changeInfo, updatedTab) => {
-//         if (updatedTabId === tabId && changeInfo.status === "complete") {
-//             // Вкладка полностью загружена
-//             updateCurrentSession(tabId)
-//             chrome.tabs.onUpdated.removeListener(onTabUpdated);
-//         }
-//     };
-//     // отслеживание окончания загрузки вкладки
-//     chrome.tabs.onUpdated.addListener(onTabUpdated);
-// });
+chrome.tabs.onCreated.addListener(updateCurrentSession__V4);
 
+// обновление текущих вкладок при завершении загрузки вкладки
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete') {
-        updateCurrentSession();
+        updateCurrentSession__V4();
 
         if (tab.favIconUrl) {
             detectiveIcons(
@@ -306,6 +282,5 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 tab.favIconUrl
             )
         }
-
     }
 });
