@@ -306,7 +306,7 @@ async function fillPopUpGroups (callback) {
     listAllGroups.querySelectorAll("button").forEach( node => node.remove() )
 
     const groups = await getAllGroups();
-    groups.forEach( group => {
+    groups.reverse().forEach( group => {
         let btnGroup = document.createElement('button');
         btnGroup.innerHTML = `
             <svg class="icon"><use xlink:href="#ico-point-group"/></svg>

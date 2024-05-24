@@ -4,7 +4,7 @@
     "version": "1.0",
     "manifest_version": 3,
     "icons": {
-        "128":"icons/tabex-icon.png"
+        "128":"icons/128.png"
     },
     "action": {},
     "permissions": ["tabs", "windows"],

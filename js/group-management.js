@@ -56,7 +56,7 @@ async function sortForCurrentByTitle(isReverse) {
         chrome.tabs.move(tab.id, { index });
     });
 
-    updateCurrentSession()
+    updateCurrentSession__V4()
 }
 
 
@@ -125,7 +125,7 @@ async function sortForCurrentByDomain(isReverse) {
         chrome.tabs.move(tab.id, { index });
     });
 
-    updateCurrentSession()
+    updateCurrentSession__V4()
 }
 
 

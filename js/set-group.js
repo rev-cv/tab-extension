@@ -404,7 +404,6 @@ function setTab (group, objTab, isCurrent, previousNode) {
             // deleteTab(objTab.id, objTab.date);
         } else if (event.button === 1) {
             chrome.tabs.create({ url: objTab.url, active: false });
-            // updateCurrentSession()
         }
     })
 

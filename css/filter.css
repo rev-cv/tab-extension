@@ -72,12 +72,14 @@ main > .filter-panel > input {
 
 main > .filter-panel > .presets {
     grid-column: 2 / -1;
+    user-select: none;
 }
 
 main > .filter-panel > .presets > button {
     background-color: var(--color-widget);
     color: var(--color-content);
     border-radius: 5px;
+    border: 1px solid transparent;
     padding: 5px 10px;
     margin-right: 1px;
     font-size: 10px;
@@ -85,8 +87,8 @@ main > .filter-panel > .presets > button {
 }
 
 main > .filter-panel > .presets > button.active {
-    background-color: var(--color-accent);
-    color: var(--color-canvas);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 main > .filter-panel > .presets > span {

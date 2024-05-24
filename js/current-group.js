@@ -174,6 +174,12 @@ async function updateCurrentSession__V4 () {
     // применение фильтрации, если она включена
     if (filteringModeEnabled) filtrationCurrent(presetfilter, appliedFilters)
 
+    
+    // выключение режима выделения, если выделять нечего
+    if (browserTabs.length === 0) {
+        currentGroup.classList.remove("is-select-mode");
+    }
+
 }
 
 
