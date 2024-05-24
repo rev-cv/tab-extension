@@ -1,7 +1,7 @@
 # TabEx
 Умный Менеджер Вкладок
 
-![](/icon/tabex-logo.webp)
+![](https://github.com/rev-cv/tab-extension/blob/main/icons/logo.svg)
 
 TabEx is a powerful Chrome extension that helps you manage your browser tabs efficiently. Forget about clutter and lost links - TabEx gives you complete control over your tabs.
 Key features:
