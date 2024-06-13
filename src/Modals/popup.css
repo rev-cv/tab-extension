@@ -3,7 +3,7 @@ body {
     position: relative;
 }
 
-#curtain {
+.curtain {
     z-index: 100;
     position: absolute;
     top: 0;
@@ -12,18 +12,22 @@ body {
     left: 0;
 
     background-color: var(--color-curtain);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(0);
     
-    transition: opacity 300ms;
+    transition: 300ms;
 
     display: flex;
     justify-content: center;
     align-items: center;
 
     opacity: 0;
-    display: none;
 
     cursor: pointer;
+}
+
+.curtain.show {
+    opacity: 1;
+    backdrop-filter: blur(5px);
 }
 
 #popup-import,
@@ -37,7 +41,7 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, .2);
     position: absolute;
     transform: scale(1);
-    transition: transform 300ms;
+    transition: transform 200ms;
     transform-origin: left bottom;
 
     padding: 20px;
@@ -56,17 +60,17 @@ body {
     transform: scale(0);
 }
 
-#curtain > div > .title {
+.curtain > div > .title {
     font-size: 24px;
     font-weight: 700;
     color: var(--color-content);
 }
 
-#curtain > div > .import-from {
+.curtain > div > .import-from {
     justify-self: end;
 }
 
-#curtain > div > .import-from > img {
+.curtain > div > .import-from > img {
     height: 30px;
     margin: 0 10px 10px 10px;
 
@@ -95,11 +99,6 @@ body {
 
     padding: 20px;
 
-    /* display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 30px 1fr 30px;
-    grid-row-gap: 10px; */
-
     display: flex;
     flex-direction: column;
 }
@@ -115,7 +114,7 @@ body {
     padding: 20px 0;
 }
 
-#curtain > div > textarea {
+.curtain > div > textarea {
     grid-column: 1 / -1;
 
     font-size: 14px;
@@ -133,31 +132,31 @@ body {
     overflow-x: auto;
 }
 
-#curtain > div > textarea::-webkit-scrollbar {
+.curtain > div > textarea::-webkit-scrollbar {
 	width: 5px;
     height: 5px;
 }
 
-#curtain > div > textarea::-webkit-scrollbar-track {
+.curtain > div > textarea::-webkit-scrollbar-track {
 	background-color: transparent;
     border-radius: 1px;
 }
 
-#curtain > div > textarea::-webkit-scrollbar-thumb {
+.curtain > div > textarea::-webkit-scrollbar-thumb {
 	background-color: var(--color-content-30);
     border-radius: 1px;
 }
 
-#curtain > div > textarea::-webkit-scrollbar-corner {
+.curtain > div > textarea::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
-#curtain > div > .btns {
+.curtain > div > .btns {
     display: flex;
     justify-content: center;
 }
 
-#curtain > div > .btns > button {
+.curtain > div > .btns > button {
     margin: 0 5px;
 }
 

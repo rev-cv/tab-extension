@@ -1,79 +1,101 @@
-
-const curtain = document.querySelector("#curtain");
-curtain.addEventListener("mousedown", closePopUp)
-const importPopUp = curtain.querySelector("#popup-import");
-const donatePopUp = curtain.querySelector("#popup-donate");
-const exportPopUp = curtain.querySelector("#popup-export");
-const tagsPopUp = curtain.querySelector("#popup-tags");
-const groupsPopUp = curtain.querySelector("#popup-select-group");
+import { getDomain } from './utils';
 
 
-const allPopUps = [importPopUp, donatePopUp, exportPopUp, tagsPopUp, groupsPopUp];
-
-allPopUps.forEach( node => {
-    node.onclick = event => event.stopPropagation();
-})
-
-
-document.querySelector("#btn-import").onclick = e => openPopUp("inport");
-document.querySelector("#btn-donate").onclick = e => openPopUp("donate");
-document.querySelector("#btn-export").onclick = e => openPopUp("export");
-document.querySelector("#popup-import > button").onclick = importData;
-document.querySelector("#btn-generate-onetab").onclick = exportInOneTab;
-document.querySelector("#btn-generate-tabex").onclick = exportInTabEx;
+var db = new Dexie("tab-ex-database");
+db.version(1).stores({
+    tabs: `++id, title, url, icon, date, domain, description`,
+    tags: `++id, name, description`,
+    sessions: `++id, name, date`,
+});
 
 
-function closePopUp (event) {
+export async function getAllGroups() {
+    const groups = await db.sessions.toArray();
+    let delGroup = [];
 
-    if (event === undefined) close()
-    else if (event.target.id === "curtain") close()
-
-    function close(){
-        curtain.style.opacity = 0;
-        setTimeout(() => {
-            curtain.style.display = "none";
-        }, 300);
-
-        allPopUps.forEach( node => { node.classList.add("disabled") })
-    }
-}
-
-
-function openPopUp (window, callback) {
-
-    curtain.style.display = "flex";
-    setTimeout(() => {
-        curtain.style.opacity = 1;
-
-        switch (window) {
-            case "tags": {
-                tagsPopUp.classList.remove("disabled");
-                fillPopUpTags();
-                break;
-            }
-            case "groups": {
-                groupsPopUp.classList.remove("disabled");
-                fillPopUpGroups(callback);
-                break;
-            }
-            case "inport": {
-                importPopUp.classList.remove("disabled"); break;
-            }
-            case "donate":{
-                donatePopUp.classList.remove("disabled"); break;
-            }
-            case "export":{
-                exportPopUp.classList.remove("disabled"); break;
-            }
-            default: break;
+    for (let i = 0; i < groups.length; i++) {
+        const sess = groups[i];
+        const tabs = await db.tabs.where('date').equals(sess.date).toArray();
+        if (tabs.length === 0){
+            delGroup.push(sess.id)
+            db.sessions.delete(sess.id)
+        } else {
+            sess.tabs = tabs;
         }
-    }, 10);
+    }
+    return groups.filter( group => !delGroup.includes(group.id) )
 }
 
 
-async function importData(){
+export async function deleteTab (tabID, update) {
 
-    const text = document.querySelector("#popup-import > textarea").value.trim();
+    const tab = await db.tabs.get(tabID);
+    await db.tabs.delete(tabID);
+    const count = await db.tabs.where('date').equals(tab.date).count();
+
+    if (count === 0) {
+        const group = await db.sessions.where('date').equals(tab.date).first();
+        await db.sessions.delete(group.id)
+    }
+
+    update()
+}
+
+
+export async function renameGroup (groupID, newName, update) {
+    const group = await db.sessions.get(groupID);
+    const name = newName === "" ? group.date : newName;
+    await db.sessions.update(group.id, { name });
+
+    update()
+
+    return name
+}
+
+
+export async function editDescriptionForTab ( tabID, description ) {
+    db.tabs.update(tabID, { description })
+}
+
+
+export async function exportInOneTab (event) {
+    let text = "";
+
+    const sessions = await db.sessions.toArray();
+
+    for (let i = 0; i < sessions.length; i++) {
+        const tabs = await db.tabs.where('date').equals(sessions[i].date).toArray();
+        tabs.forEach( tab => text += `${tab.url} | ${tab.title}\n`);
+        text += "\n";
+    }
+
+    return text.trim()
+}
+
+
+export async function exportInTabEx (event) {
+    let text = "";
+
+    const sessions = await db.sessions.toArray();
+
+    for (let i = 0; i < sessions.length; i++) {
+        const tabs = await db.tabs.where('date').equals(sessions[i].date).toArray();
+
+        text += `## ${sessions[i].name}\n`;
+        text += `date: ${sessions[i].date}\n\n`;
+        
+        tabs.forEach( tab => {
+            text += `- [${tab.title}](${tab.url}) ${tab.description}\n`
+        });
+
+        text += "\n";
+    }
+
+    return text.trim()
+}
+
+
+export async function importData(text){
 
     if (text != "") {
         const strings = text.split("\n").map( str => str.trim());
@@ -92,15 +114,9 @@ async function importData(){
         }
 
         // группы добавляются в БД
-        const groups = await saveImportData(addedGroup);
+        await saveImportData(addedGroup);
 
-        groups.forEach( group => {
-            setGroup(group, true)
-        })
-
-        closePopUp()
-
-        if (filteringModeEnabled) backFiltration()
+        return true
     }
 }
 
@@ -255,64 +271,71 @@ async function importFromTabEx (strings) {
 }
 
 
-const listAllTags = document.querySelector("#list-all-tags");
+async function findIcon (domain) {
 
-async function fillPopUpTags() {
+    const tab = await db.tabs.filter( tab => 
+        tab.icon != "" && tab.icon != undefined && tab.domain === domain
+    ).first();
 
-    listAllTags.querySelectorAll(".tag-name, .tag-desc").forEach( node => node.remove() )
-
-    const allTags = await getAllTags();
-
-    allTags.forEach( tag => {
-
-        let tagBtn = document.createElement('button');
-        let tabTxt = document.createElement('textarea');
-
-        tagBtn.classList.add("tag-name");
-        tabTxt.classList.add("tag-desc");
-
-        tagBtn.innerHTML = `<span>${tag.name}</span> <span>${tag.count}</span>`;
-        tabTxt.textContent = tag.description;
-        tabTxt.placeholder = "description";
-        tabTxt.rows = 1;
-        
-        tagBtn.onclick = event => {
-            setPreset("tag");
-            filterInput.value = tag.name;
-            filtration();
-            closePopUp();
-        }
-
-        tabTxt.oninput = event => {
-            tabTxt.style.minHeight = tabTxt.scrollHeight + 'px';
-        }
-
-        tabTxt.onchange = event => {
-            updateTagDescription(tag.id, tabTxt.value.trim() )
-        }
-
-        listAllTags.append(tagBtn, tabTxt);
-
-        tabTxt.style.minHeight = tabTxt.scrollHeight + 'px';
-
-    })
+    return tab === undefined ? "" : tab.icon
 }
 
 
-const listAllGroups = document.querySelector("#list-all-groups");
+async function saveImportData (groups) {
 
-async function fillPopUpGroups (callback) {
+    let sessions = [];
+    let tabs = [];
+    let groupDate = [];
 
-    listAllGroups.querySelectorAll("button").forEach( node => node.remove() )
-
-    const groups = await getAllGroups();
-    groups.reverse().forEach( group => {
-        let btnGroup = document.createElement('button');
-        btnGroup.innerHTML = `
-            <svg class="icon"><use xlink:href="#ico-point-group"/></svg>
-            <span>${group.name}</span>
-        `;
-        btnGroup.onclick = event => callback(group)
-        listAllGroups.append(btnGroup)
+    groups.forEach( g => {
+        sessions.push({name: g.name, date: g.date});
+        tabs = [...tabs, ...g.tabs];
+        groupDate.push(g.date);
     })
+
+    await db.tabs.bulkPut(tabs);
+    await db.sessions.bulkPut(sessions);
+
+    let groupFromDB = [];
+
+    for (let i = 0; i < groupDate.length; i++) {
+        const g = await db.sessions.where('date').equals(groupDate[i]).first();
+        g.tabs = await db.tabs.where('date').equals(groupDate[i]).toArray();
+        groupFromDB.push(g);
+    }
+
+    return groupFromDB;
 }
+
+
+
+
+
+
+
+
+
+
+// async function createGroup () {
+//     const sessID = await db.sessions.bulkPut([{
+//         name: "test",
+//         date: "2024-05-05T12:45"
+//     }]);
+
+//     return sessID
+// }
+// async function createTab () {
+//     await db.tabs.bulkPut([{
+//         title: "611 Готовимся к собеседованию по Rust: 4 самых частых вопросов. Часть 1",
+//         url: "https://habr.com/ru/companies/otus/articles/809865/",
+//         icon: "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
+//         date: "2024-05-05T12:45",
+//         domain: "habr.com",
+//         description: "",
+//     }]);
+// }
+// createGroup ()
+// createTab ()
+// createTab ()
+// createTab ()
+// createTab ()
