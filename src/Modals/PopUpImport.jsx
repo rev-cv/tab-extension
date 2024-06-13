@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { importData } from '../scripts/storage.js';
+import { db__importData } from '../scripts/storage.js';
 import './popup.css'
 
 function PopUpImport (props) {
@@ -20,7 +20,7 @@ function PopUpImport (props) {
     }
 
     const strartImport = () => {
-        importData(textImport).then( () => {
+        db__importData(textImport).then( () => {
             props.update();
             deleteWidget()
         })

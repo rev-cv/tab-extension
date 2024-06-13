@@ -54,6 +54,14 @@ main > .filter-panel > button > svg {
     height: 60%;
 }
 
+main > .filter-panel > #back-filtration {
+    visibility: hidden;
+}
+
+main > .filter-panel > #back-filtration.active {
+    visibility: visible;
+}
+
 main > .filter-panel > input {
     width: 100%;
     background-color: var(--color-widget);

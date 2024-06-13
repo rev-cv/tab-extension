@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Tab from '../Tab/Tab.jsx';
-import { renameGroup } from '../scripts/storage.js';
+import { db__renameGroup } from '../scripts/storage.js';
 import { getDomain } from '../scripts/utils.js';
 import './group.css';
 
@@ -126,7 +126,7 @@ function Group (props) {
                             className="edit-title"
                             defaultValue={props.group.name} 
                             onBlur={e => {
-                                renameGroup(
+                                db__renameGroup(
                                     props.group.id, e.target.value.trim(), props.updateGroups
                                 ).then( newName => e.target.value = newName)
                             }}
@@ -215,7 +215,7 @@ function Group (props) {
                 
                 <button className='select-delete'>
                     <svg className="icon"><use xlinkHref="#ico-del"/></svg>
-                    <span>${ isCurrent ? "close" : "delete" }</span>
+                    <span>{ isCurrent ? "close" : "delete" }</span>
                 </button>
             </div>
 
@@ -230,6 +230,7 @@ function Group (props) {
                         isCurrent={isCurrent}
                         selectedTabs={selectedTabs}
                         setSelectTabs={setSelectTabs}
+                        filterGroups={props.filterGroups}
                     />
                 )
             }

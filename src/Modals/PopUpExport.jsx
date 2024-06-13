@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { exportInTabEx, exportInOneTab } from '../scripts/storage.js';
+import { db__exportInTabEx, db__exportInOneTab } from '../scripts/storage.js';
 import './popup.css'
 
 function PopUpExport (props) {
@@ -20,11 +20,11 @@ function PopUpExport (props) {
     }
 
     const export1 = () => {
-        exportInOneTab().then( text => setExportText(text) )
+        db__exportInOneTab().then( text => setExportText(text) )
     }
 
     const export2 = () => {
-        exportInTabEx().then( text => setExportText(text) )
+        db__exportInTabEx().then( text => setExportText(text) )
     }
 
     return (

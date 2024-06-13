@@ -1,10 +1,11 @@
 import React from 'react';
+import { ex__openTab } from '../scripts/chrome.js';
 
-function extractTagsAndLinks(description) {
+function extractTagsAndLinks(description, filterGroups) {
     const elements = [];
     let lastIndex = 0;
 
-    // Регулярное выражение для поиска тегов, ссылок и переносов строк
+    // Регулярное выражение для поиска тегов и ссылок
     const regex = /#[\d\w]+|https:\/\/[\w./-]+|\n/g;
     let match;
 
@@ -19,14 +20,23 @@ function extractTagsAndLinks(description) {
         if (matchedText.startsWith('#')) {
             // Создаем кнопку для тега
             elements.push(
-                <button key={match.index} className="open-tag" data-tag={matchedText}>
+                <button 
+                    key={match.index} 
+                    className="open-tag" 
+                    onClick={e => filterGroups(3, matchedText)}
+                    data-tag={matchedText}
+                    >
                     {matchedText}
                 </button>
             );
         } else if (matchedText.startsWith('https://')) {
             // Создаем кнопку для ссылки
             elements.push(
-                <button key={match.index} className="open-link" data-link={matchedText}>
+                <button 
+                    key={match.index} 
+                    className="open-link" 
+                    onClick={e => ex__openTab(e, false, {url: matchedText})}
+                    >
                     {matchedText}
                 </button>
             );
@@ -46,8 +56,8 @@ function extractTagsAndLinks(description) {
     return elements;
 }
 
-function FormattedText({ description }) {
-    const elements = extractTagsAndLinks(description);
+function FormattedText({ description, filterGroups }) {
+    const elements = extractTagsAndLinks(description, filterGroups);
     return <div>{elements}</div>;
 }
 

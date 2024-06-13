@@ -1,7 +1,7 @@
 import { getCurrentDate, getDomain } from './utils';
 
 
-export function ex__launchObserver(callback) {
+export function ex__observer(callback) {
     // запуск наблюдателя за изменениями в текущих открытых вкладках
     // при каждом изменении выполняется переданная функция
 
@@ -20,6 +20,16 @@ export function ex__launchObserver(callback) {
             if (changeInfo.status === 'complete') 
                 callback()
         });
+
+        // chrome.webNavigation.onCommitted.addListener((details) => {
+        //     console.log('Navigation committed:', details);
+        // });
+        
+        chrome.webNavigation.onDOMContentLoaded.addListener(details => callback());
+        
+        // chrome.webNavigation.onCompleted.addListener((details) => {
+        //     console.log('Page fully loaded:', details);
+        // });
     } catch (error) {
         console.log("Observer launch failed")
     }
@@ -46,8 +56,8 @@ export async function ex__getCurrentTabs() {
 
                         const isTabEx = domain[1] === "chrome-extension" && tab.title === "TabEx";
 
-                        // достать описание, если оно было задано для текущей вкладки
-                        const descr = dataDescriptionForCurrentTabs.find( e => e.id === tab.id);
+                        // // достать описание, если оно было задано для текущей вкладки
+                        // const descr = dataDescriptionForCurrentTabs.find( e => e.id === tab.id);
 
                         if (!isTabEx) {
                             currentTabs.push({
@@ -57,7 +67,8 @@ export async function ex__getCurrentTabs() {
                                 icon: tab.favIconUrl,
                                 date,
                                 domain: domain[1],
-                                description: descr === undefined ? "" : descr.description,
+                                // description: descr === undefined ? "" : descr.description,
+                                description: "",
                             })
                         }
                     } else {
@@ -74,13 +85,90 @@ export async function ex__getCurrentTabs() {
         return conversionToExtensionFormat(tabs, date)
 
     } catch (error) {
-        console.log("Retrieving current tabs failed")
+        console.log("Error #4785 ")
+        console.log(error)
         return []
     }
 }
 
 
-export function ex__openTab (event, isCurrent) {
+export async function ex__filterCurrentTabs (mode, requests) {
+
+    let result = [];
+
+    try {
+        const tabs = await ex__getCurrentTabs();
+
+        switch (mode) {
+            case 0: { // title + description
+                result = tabs.filter( tab => {
+                    const title = tab.title.toLowerCase();
+                    const descr = tab.description.toLowerCase();
+                    for (let i = 0; i < requests.length; i++) {
+                        if (title.includes(requests[i]) || descr.includes(requests[i])) 
+                            return true;
+                    }
+                    return false
+                })
+                break;
+            }
+            case 1: { // title
+                result = tabs.filter( tab => {
+                    const title = tab.title.toLowerCase();
+                    for (let i = 0; i < requests.length; i++) {
+                        if (title.includes(requests[i])) 
+                            return true;
+                    }
+                    return false
+                })
+                break;
+            }
+            case 2: // description & tag
+            case 3: {
+                result = tabs.filter( tab => {
+                    const descr = tab.description.toLowerCase();
+                    for (let i = 0; i < requests.length; i++) {
+                        if (descr.includes(requests[i])) 
+                            return true;
+                    }
+                    return false
+                })
+                break;
+            }
+            case 4: { // domain
+                result = tabs.filter( tab => {
+                    const domain = tab.domain.toLowerCase();
+                    for (let i = 0; i < requests.length; i++) {
+                        if (domain.includes(requests[i])) 
+                            return true;
+                    }
+                    return false
+                })
+                break;
+            }
+            case 5: { // url
+                result = tabs.filter( tab => {
+                    const url = tab.domain.toLowerCase();
+                    for (let i = 0; i < requests.length; i++) {
+                        if (url.includes(requests[i])) 
+                            return true;
+                    }
+                    return false
+                })
+                break;
+            }
+            default:
+                break;
+        }
+    } catch (error) {
+        
+    }
+    
+    return result
+}
+
+
+export function ex__openTab (event, isCurrent, objTab) {
     // открытие вкладок в браузере
     try {
         if (isCurrent) {
@@ -90,13 +178,17 @@ export function ex__openTab (event, isCurrent) {
         } else if (event.button === 1) {
             chrome.tabs.create({ url: objTab.url, active: false });
         }
+
+        console.log(event.button)
     } catch (error) {
-        console.log("Open tab")
+        console.log("Open tab > ", error)
     }
 }
 
 
-
+export function ex__closeTab (tabID) {
+    chrome.tabs.remove(tabID);
+}
 
 
 

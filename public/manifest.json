@@ -1,0 +1,14 @@
+{
+    "name": "TabEx",
+    "description": "Expansion of tabs.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons": {
+        "128":"/128.png"
+    },
+    "action": {},
+    "permissions": ["tabs", "windows", "webNavigation"],
+    "background": {
+        "service_worker": "/background.js"
+    }
+}

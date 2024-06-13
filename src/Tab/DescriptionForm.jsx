@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { editDescriptionForTab } from '../scripts/storage.js';
+import { db__editDescriptionForTab } from '../scripts/storage.js';
 
 function DescriptionForm (props) {
 
@@ -17,7 +17,7 @@ function DescriptionForm (props) {
         const text = form.current.value.trim();
 
         if (!props.isCurrent) {
-            editDescriptionForTab(props.tabID, text)
+            db__editDescriptionForTab(props.tabID, text)
         } 
         
         props.setTextDescr(text)

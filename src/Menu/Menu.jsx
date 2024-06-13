@@ -9,6 +9,8 @@ function Menu (props) {
     const [isOpenModalExport, setModalExport] = useState(false);
     const [isOpenModalDonate, setModalDonate] = useState(false);
 
+    
+
     const toogleModal = (key) => {
 
         switch (key) {
@@ -32,19 +34,45 @@ function Menu (props) {
     }
 
     const moveToGroup = (groupID) => {
-
+        const container = document.querySelector("main > .groups").parentNode;
+        const element = container.querySelector(`#group-${groupID}`)
+        
+        let startScrollTop = container.scrollTop;
+        let distance = element.offsetTop - container.scrollTop - 90;
+        let duration = 500;
+        let startTime = null;
+        
+        function animate(currentTime) {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const run = Math.min(timeElapsed / duration, 1);
+            const newScrollTop = startScrollTop + distance * (
+                run < 0.5 ? 0.5 * Math.pow(run * 2, 2) : 1 - 0.5 * Math.pow(2 - run * 2, 2)
+            );
+            
+            container.scrollTop = newScrollTop;
+    
+            if (timeElapsed < duration) {
+                requestAnimationFrame(animate);
+            }
+        }
+        requestAnimationFrame(animate);
     }
 
     return (<>
         <menu>
-            <div className="logo">
+            {/* <div className="logo">
                 <img src="/tabex-logo.webp" alt="" draggable="false" />
-            </div>
+            </div> */}
 
             <div className="group-links">
                 {/* GROUP LINKS */}
 
-                <button id={`point-for-current`} key={`point-for-current`}>
+                <button 
+                    id={`point-for-current`} 
+                    key={`point-for-current`}
+                    onClick={e => moveToGroup('current')}
+                    >
                     <svg className="icon"><use xlinkHref="#ico-point-current"/></svg>
                     <div className='title'>Current</div>
                     <div className='count'>{props.currentTabs.length}</div>

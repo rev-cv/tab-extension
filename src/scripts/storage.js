@@ -9,7 +9,7 @@ db.version(1).stores({
 });
 
 
-export async function getAllGroups() {
+export async function db__getAllGroups() {
     const groups = await db.sessions.toArray();
     let delGroup = [];
 
@@ -27,7 +27,7 @@ export async function getAllGroups() {
 }
 
 
-export async function deleteTab (tabID, update) {
+export async function db__deleteTab (tabID, update) {
 
     const tab = await db.tabs.get(tabID);
     await db.tabs.delete(tabID);
@@ -42,7 +42,7 @@ export async function deleteTab (tabID, update) {
 }
 
 
-export async function renameGroup (groupID, newName, update) {
+export async function db__renameGroup (groupID, newName, update) {
     const group = await db.sessions.get(groupID);
     const name = newName === "" ? group.date : newName;
     await db.sessions.update(group.id, { name });
@@ -53,12 +53,12 @@ export async function renameGroup (groupID, newName, update) {
 }
 
 
-export async function editDescriptionForTab ( tabID, description ) {
+export async function db__editDescriptionForTab ( tabID, description ) {
     db.tabs.update(tabID, { description })
 }
 
 
-export async function exportInOneTab (event) {
+export async function db__exportInOneTab (event) {
     let text = "";
 
     const sessions = await db.sessions.toArray();
@@ -73,7 +73,7 @@ export async function exportInOneTab (event) {
 }
 
 
-export async function exportInTabEx (event) {
+export async function db__exportInTabEx (event) {
     let text = "";
 
     const sessions = await db.sessions.toArray();
@@ -95,7 +95,7 @@ export async function exportInTabEx (event) {
 }
 
 
-export async function importData(text){
+export async function db__importData(text){
 
     if (text != "") {
         const strings = text.split("\n").map( str => str.trim());
@@ -308,7 +308,92 @@ async function saveImportData (groups) {
 }
 
 
+export async function db__getFilteredGroups (mode, requests) {
 
+    let result = [];
+    let newGroups = {};
+
+    switch (mode) {
+        case 0: { // title + description
+            result = await db.tabs.filter( tab => {
+                const title = tab.title.toLowerCase();
+                const descr = tab.description.toLowerCase();
+
+                for (let i = 0; i < requests.length; i++) {
+                    const req = requests[i];
+                    if (title.includes(req) || descr.includes(req)) 
+                        return true;
+                }
+                return false
+            }).toArray()
+            break;
+        }
+        case 1: { // title
+            result = await db.tabs.filter( tab => {
+                const title = tab.title.toLowerCase();
+                for (let i = 0; i < requests.length; i++) {
+                    if (title.includes(requests[i])) 
+                        return true;
+                }
+                return false
+            }).toArray()
+            break;
+        }
+        case 2: // description & tag
+        case 3: { 
+            result = await db.tabs.filter( tab => {
+                const descr = tab.description.toLowerCase();
+                for (let i = 0; i < requests.length; i++) {
+                    if (descr.includes(requests[i])) 
+                        return true;
+                }
+                return false
+            }).toArray()
+            break;
+        }
+
+        case 4: { // domain
+            result = await db.tabs.filter( tab => {
+                const domain = tab.domain.toLowerCase();
+                for (let i = 0; i < requests.length; i++) {
+                    if (domain.includes(requests[i])) 
+                        return true;
+                }
+                return false
+            }).toArray()
+            break;
+        }
+
+        case 5: { // url
+            result = await db.tabs.filter( tab => {
+                const url = tab.url.toLowerCase();
+                for (let i = 0; i < requests.length; i++) {
+                    if (url.includes(requests[i])) 
+                        return true;
+                }
+                return false
+            }).toArray()
+            break;
+        }
+   
+        default:
+            break;
+    }
+
+    for (let i = 0; i < result.length; i++) {
+        const tab = result[i];
+        if (!Object.keys(newGroups).includes(tab.date)){
+            const group = await db.sessions.where('date').equals(tab.date).first();
+            newGroups[group.date] = group;
+            newGroups[group.date].tabs = [];
+        }
+        newGroups[tab.date].tabs.push(tab)
+    }
+
+    const groups = Object.keys(newGroups).map(key => newGroups[key]);
+
+    return groups
+}
 
 
 
