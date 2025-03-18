@@ -37,6 +37,15 @@ main > .groups > .g {
     display: none;
 }
 
+main > .groups > .not-current-tabs {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-accent);
+    padding-bottom: 30px;
+    padding-left: 10px;
+    user-select: none;
+}
+
 main > .groups > .g > .control-panel {
     display: flex;
     height: 30px;
@@ -135,6 +144,21 @@ main > .groups > .g.is-select-mode > .control-panel > .btn-g-select {
 
 main > .groups > .g.is-select-mode > .control-panel > .btn-g-select > svg {
     --color-accent: var(--color-canvas);
+}
+
+main > .groups > .g > .control-panel > .btn-g-sort-alp > .reverse,
+main > .groups > .g > .control-panel > .btn-g-sort-www > .reverse {
+    position: absolute;
+    width: 10px;
+    height: 5px;
+    bottom: 8px;
+    right: 2px;
+}
+
+main > .groups > .g > .control-panel > .btn-g-sort-alp > .reverse > svg,
+main > .groups > .g > .control-panel > .btn-g-sort-www > .reverse > svg {
+    height: 100%;
+    width: 100%;
 }
 
 

@@ -10,7 +10,7 @@ main > .filter-panel {
     grid-gap: 6px;
     padding: 0 4px;
 
-    margin: -20px -20px 30px -20px;
+    /* margin: -20px -20px 30px -20px; */
     padding: 10px 20px 10px 20px;
     background-color: var(--color-canvas);
 
@@ -54,6 +54,14 @@ main > .filter-panel > button > svg {
     height: 60%;
 }
 
+main > .filter-panel > #back-filtration {
+    visibility: hidden;
+}
+
+main > .filter-panel > #back-filtration.active {
+    visibility: visible;
+}
+
 main > .filter-panel > input {
     width: 100%;
     background-color: var(--color-widget);
@@ -95,4 +103,5 @@ main > .filter-panel > .presets > span {
     font-size: 14px;
     font-weight: 700;
     color: var(--color-accent);
+    margin-right: 10px;
 }
